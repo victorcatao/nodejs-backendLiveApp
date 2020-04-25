@@ -105,7 +105,7 @@ router.post('/addToCalendar', async (req, res) => {
 });
 
 
-router.get('/getLives', async (req, res) => {
+router.get('/all', async (req, res) => {
 
   Live.find().then(function(docs){
     res.send(docs)
@@ -114,4 +114,4 @@ router.get('/getLives', async (req, res) => {
 });
 
 
-module.exports = app => app.use('/live', router);
+module.exports = app => app.use('/lives', router);

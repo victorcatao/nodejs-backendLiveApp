@@ -18,7 +18,7 @@ const LiveSchema = new mongoose.Schema({
       type: String
     }
   ],
-  social_network:[ 
+  social_network: [ 
     {
       type: String,
       require: true
