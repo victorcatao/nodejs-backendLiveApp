@@ -3,7 +3,6 @@ const router = express.Router();
 const firebase = require('../helpers/firebase')
 const Live = require('../models/Live');
 
-
 router.post('/createLive', function(req, res) {
 
 
