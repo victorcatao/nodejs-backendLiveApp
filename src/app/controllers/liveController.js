@@ -3,7 +3,7 @@ const router = express.Router();
 const firebase = require('../helpers/firebase')
 const Live = require('../models/live');
 
-router.post('/createLive', function(req, res) {
+router.post('/create', function(req, res) {
 
 
 	if(req.body.date == null || req.body.date.length != 10) {
@@ -29,7 +29,7 @@ router.post('/createLive', function(req, res) {
 
 
 
-router.get('/getLives/tomorrow', function(req, res) {
+router.get('/tomorrow', function(req, res) {
 	
 	var tomorrowDate = new Date();
 	tomorrowDate.setDate(tomorrowDate.getDate() + 1);
@@ -54,7 +54,7 @@ router.get('/getLives/tomorrow', function(req, res) {
 
 
 
-router.get('/getLives/today', function(req, res) {
+router.get('/today', function(req, res) {
 	
 	let options = { day: 'numeric', month: '2-digit', year: 'numeric' };
 	let today = new Date().toLocaleString('pt-BR', options) // 2020-04-23
