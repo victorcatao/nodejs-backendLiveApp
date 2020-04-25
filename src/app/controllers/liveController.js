@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const firebase = require('../helpers/firebase')
-const Live = require('../models/live');
+const Live = require('../helpers/live');
 
 router.post('/createLive', function(req, res) {
 
