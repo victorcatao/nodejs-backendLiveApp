@@ -2,6 +2,30 @@ const express = require('express');
 const router = express.Router();
 const firebase = require('../helpers/firebase')
 const Live = require('../models/live');
+const Suggestion = require('../models/suggestion')
+
+router.post('/sendSuggestion', function(req, res) {
+
+
+	if(req.body.artist == null) {
+		return res.status(400).send({'errorMessage': 'Artista inválido'})
+	}
+
+	if(req.body.social_network == null) {
+		return res.status(400).send({'errorMessage': 'Social network inválido'})
+	}
+
+	var suggestion = new Suggestion(req.body);
+	suggestion.save(function(error) {
+		if(error) {
+			console.log(error)
+			return res.status(400).send({'errorMessage': error.message});
+		} else {
+			res.send(suggestion)
+		}
+	})
+});
+
 
 router.post('/create', function(req, res) {
 
@@ -26,7 +50,6 @@ router.post('/create', function(req, res) {
 		}
 	})
 });
-
 
 
 router.get('/tomorrow', function(req, res) {
