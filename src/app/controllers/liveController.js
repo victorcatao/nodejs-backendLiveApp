@@ -76,6 +76,29 @@ router.get('/today', function(req, res) {
 
 
 
+router.get('/findByGenre', function(req, res) {
+	
+	const genreName = req.query.genre_name
+	console.log(genreName)
+
+	Live.find({ 
+		genres: {
+			$elemMatch: {
+				$regex: genreName,
+				$options: 'i' // case insensitive
+			} 
+		} 
+	}, function(err, docs){
+			if(err) {
+				return res.send(err)
+			}
+			return res.send(docs)
+		}
+	);
+});
+
+
+
 router.get('/genres', function(req, res) {
 	
 	Live.find({}, function(err, docs){
