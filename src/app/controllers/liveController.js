@@ -153,10 +153,9 @@ router.post('/addToCalendar', async (req, res) => {
 
 router.get('/all', async (req, res) => {
 
-	res.status(400).send({message: 'TESTE COM SUCESSO'})
-  // Live.find().then(function(docs){
-  //   res.send(docs)
-  // });
+  Live.find().then(function(docs){
+    res.send(docs)
+  });
 
 });
 
