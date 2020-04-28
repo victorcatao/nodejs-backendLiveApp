@@ -3,6 +3,7 @@ const router = express.Router();
 const firebase = require('../helpers/firebase')
 const Live = require('../models/live');
 const Suggestion = require('../models/suggestion')
+const schedule = require('node-schedule');
 
 router.post('/sendSuggestion', function(req, res) {
 
@@ -79,12 +80,13 @@ router.get('/tomorrow', function(req, res) {
 
 router.get('/today', function(req, res) {
 	
-	let options = { day: 'numeric', month: '2-digit', year: 'numeric' };
-	let today = new Date().toLocaleString('pt-BR', options) // 2020-04-23
-	let dateSplit = today.split('-')
+	// let options = { day: 'numeric', month: '2-digit', year: 'numeric' };
+	// let today = new Date().toLocaleString('pt-BR', options) // 2020-04-23
+	// let dateSplit = today.split('-')
 
-  	let dateBrl = dateSplit[2] + "/" + dateSplit[1] + "/" + dateSplit[0]
-  	console.log(dateBrl)
+ //  	let dateBrl = dateSplit[2] + "/" + dateSplit[1] + "/" + dateSplit[0]
+ //  	console.log(dateBrl)
+ 	let dateBrl = "27/04/2020"
 
 	Live.find(
 		{ "date": dateBrl },
@@ -144,8 +146,21 @@ router.get('/genres', function(req, res) {
 
 
 router.post('/addToCalendar', async (req, res) => {
-	firebase.sendPush("asfd", 1, 2)
-	console.log(req.body)
+
+	// const date = new Date('04/27/2020 01:06:00');
+	// console.log(date)
+	
+	// const now = new Date()
+	// const diffTime = Math.abs(date - now);
+	// const diffMinutes = Math.ceil(diffTime / (1000 * 60));
+	// console.log(diffMinutes)
+
+	// var j = schedule.scheduleJob(date, function(){
+	//   console.log('The world is going to end today.');
+	// });
+
+	firebase.sendPush("token", "title exemplo", "body exemplo")
+	// console.log(req.body)
 	res.send()
 
 });

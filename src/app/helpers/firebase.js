@@ -1,35 +1,53 @@
 const admin = require("firebase-admin");
-
-// MUDAR AQUI
-const serviceAccount = require("../../config/base-ios-swift-firebase-adminsdk-cjup7-96abd87a97.json");
+const serviceAccount = require("../../config/liveapp-275503-firebase-adminsdk-b7l2m-1f010cb215.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://base-ios-swift.firebaseio.com" // MUDAR AQUI
+  databaseURL: "https://liveapp-275503.firebaseio.com"
 });
 
-const teste = "tetes"
 
 const sendPushFunction = function sendPush(token, title, body) {
-  var payload = {
-    notification: {
-      title: title,
-      body: body
+
+  var message = {
+    // token: "c693_zwcRuqHiZEk-D0uxe:APA91bERmW9t_yI5g97OMZnUZE5BHVnxIlIv6GF8TD-qBX3Kv9yAjC_zQBi8TVBLol5lCVH79a-EORXXkHQ2p72QH7eSy23KAJvDe_O7SGT5jP5-jdrh8XMDzAnlJf6kMYy0VBQl3qIR",
+    topic: "all", 
+    data: {
+      title: "TITLE_HERE",
+      message: "MESSAGE_HERE",
+      body: "BODY_HERE",
+      // isScheduled: "true",
+      // scheduledTime: "2020-04-27 12:56:00"
+    },
+    notification: { 
+      title: "teste topic all", 
+      body: "funcionou? pelo back" 
     }
   };
 
-  var options = {
-    priority: "high",
-    timeToLive: 60 * 60 * 24
-  };
+  // var message = {
+  //   to: "/topics/all",
+  //   notification: { 
+  //     title: "Notification title", 
+  //     body: "Notification body", 
+  //     sound: "default", 
+  //     click_action: "FCM_PLUGIN_ACTIVITY", 
+  //     icon: "fcm_push_icon" 
+  //   },
+  //   data: {
+  //     "message": "This is a Firebase Cloud Messaging Topic Message!",
+  //   }
+  // }
 
-  admin.messaging().sendToDevice(token, payload, options)
-    .then(function(response) {
-      console.log("Successfully sent message:", response);
+  admin.messaging().send(message)
+    .then((response) => {
+      // Response is a message ID string.
+      console.log('Successfully sent message:', response);
     })
-    .catch(function(error) {
-      console.log("Error sending message:", error);
+    .catch((error) => {
+      console.log('Error sending message:', error);
     });
+
 }
 
 module.exports = {
