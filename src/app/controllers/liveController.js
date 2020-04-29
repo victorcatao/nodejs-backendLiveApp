@@ -60,7 +60,7 @@ router.get('/tomorrow', function(req, res) {
 
 	let options = { day: '2-digit', month: '2-digit', year: 'numeric' };
 	let tomorrow = tomorrowDate.toLocaleString('pt-BR', options) // 2020-04-23
-	let dateSplit = tomorrow.split('-')
+	let dateSplit = today.replace('-', '/').split('/')
 
   	let dateBrl = dateSplit[2] + "/" + dateSplit[1] + "/" + dateSplit[0]
 
@@ -82,7 +82,7 @@ router.get('/today', function(req, res) {
 	
 	let options = { day: 'numeric', month: '2-digit', year: 'numeric' };
 	let today = new Date().toLocaleString('pt-BR', options) // 2020-04-23
-	let dateSplit = today.split('-')
+	let dateSplit = today.replace('-', '/').split('/')
 
   	let dateBrl = dateSplit[2] + "/" + dateSplit[1] + "/" + dateSplit[0]
   	console.log(dateBrl)
