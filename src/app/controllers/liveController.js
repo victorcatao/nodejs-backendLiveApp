@@ -64,7 +64,7 @@ router.get('/tomorrow', function(req, res) {
 
   	let dateBrl = dateSplit[1] + "/" + dateSplit[0] + "/" + dateSplit[2]
   	console.log(dateBrl)
-  	
+
 	Live.find(
 		{ "date": dateBrl },
 		function(err, docs){
@@ -130,7 +130,7 @@ router.get('/genres', function(req, res) {
 		if(err) {
 			return res.send(err)
 		}
-		var genres = []
+		var genres = ["Sertanejo"] // comecar com esse por questoes de marketing :D
 
 		docs.forEach(function(live, index){
 			live.genres.forEach(function(genre, i){
