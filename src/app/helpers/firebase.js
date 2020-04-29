@@ -21,7 +21,8 @@ const sendPushFunction = function sendPush(token, title, body) {
     },
     notification: { 
       title: "teste topic all", 
-      body: "funcionou? pelo back" 
+      body: "funcionou? pelo back",
+      sound: "default"
     }
   };
 

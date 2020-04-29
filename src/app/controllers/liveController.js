@@ -80,13 +80,12 @@ router.get('/tomorrow', function(req, res) {
 
 router.get('/today', function(req, res) {
 	
-	// let options = { day: 'numeric', month: '2-digit', year: 'numeric' };
-	// let today = new Date().toLocaleString('pt-BR', options) // 2020-04-23
-	// let dateSplit = today.split('-')
+	let options = { day: 'numeric', month: '2-digit', year: 'numeric' };
+	let today = new Date().toLocaleString('pt-BR', options) // 2020-04-23
+	let dateSplit = today.split('-')
 
- //  	let dateBrl = dateSplit[2] + "/" + dateSplit[1] + "/" + dateSplit[0]
- //  	console.log(dateBrl)
- 	let dateBrl = "27/04/2020"
+  	let dateBrl = dateSplit[2] + "/" + dateSplit[1] + "/" + dateSplit[0]
+  	console.log(dateBrl)
 
 	Live.find(
 		{ "date": dateBrl },
