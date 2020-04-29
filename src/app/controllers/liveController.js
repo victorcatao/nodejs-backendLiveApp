@@ -60,10 +60,11 @@ router.get('/tomorrow', function(req, res) {
 
 	let options = { day: '2-digit', month: '2-digit', year: 'numeric' };
 	let tomorrow = tomorrowDate.toLocaleString('pt-BR', options) // 2020-23-04
-	let dateSplit = today.replace('-', '/').split('/')
+	let dateSplit = tomorrow.replace('-', '/').split('/')
 
   	let dateBrl = dateSplit[1] + "/" + dateSplit[0] + "/" + dateSplit[2]
-
+  	console.log(dateBrl)
+  	
 	Live.find(
 		{ "date": dateBrl },
 		function(err, docs){
