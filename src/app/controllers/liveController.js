@@ -165,7 +165,7 @@ router.post('/addToCalendar', async (req, res) => {
 	const liveDateTime = `${req.body.date} ${req.body.time}`
 	console.log(liveDateTime)
 
-	const scheduledTime = moment(liveDateTime, "DD-MM-YYYY HH:mm").subtract(30, 'minutes').format('YYYY-MM-DD HH:mm:ss')
+	const scheduledTime = moment(liveDateTime, "DD-MM-YYYY HH:mm").tz('America/Sao_Paulo').subtract(30, 'minutes').format('YYYY-MM-DD HH:mm:ss')
 	console.log(scheduledTime)
 
 	var j = schedule.scheduleJob(scheduledTime, function(){
