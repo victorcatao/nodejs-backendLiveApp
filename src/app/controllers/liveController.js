@@ -1,9 +1,12 @@
 const express = require('express');
+const moment = require('moment')
 const router = express.Router();
 const firebase = require('../helpers/firebase')
 const Live = require('../models/live');
 const Suggestion = require('../models/suggestion')
 const schedule = require('node-schedule');
+
+
 
 router.post('/sendSuggestion', function(req, res) {
 
@@ -145,25 +148,55 @@ router.get('/genres', function(req, res) {
 
 
 
+
+
+
+
+
+
+
+
+
 router.post('/addToCalendar', async (req, res) => {
 
-	// const date = new Date('04/27/2020 01:06:00');
-	// console.log(date)
-	
-	// const now = new Date()
-	// const diffTime = Math.abs(date - now);
-	// const diffMinutes = Math.ceil(diffTime / (1000 * 60));
-	// console.log(diffMinutes)
+	const firebaseToken = req.body.firebaseToken
+	const name = req.body.name
 
-	// var j = schedule.scheduleJob(date, function(){
-	//   console.log('The world is going to end today.');
-	// });
+	const liveDateTime = `${req.body.date} ${req.body.time}`
+	console.log(liveDateTime)
 
-	firebase.sendPush("token", "title exemplo", "body exemplo")
-	// console.log(req.body)
+	const scheduledTime = moment(liveDateTime, "DD-MM-YYYY HH:mm").subtract(30, 'minutes').format('YYYY-MM-DD HH:mm:ss')
+	console.log(scheduledTime)
+
+	var j = schedule.scheduleJob(scheduledTime, function(){
+		firebase.sendPush(firebaseToken, "Olho na Live!", `Daqui a pouco tem live com ${name}! Fique ligado ;)`, scheduledTime)
+	});
 	res.send()
 
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 router.get('/all', async (req, res) => {

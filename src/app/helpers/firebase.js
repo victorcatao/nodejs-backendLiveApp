@@ -7,38 +7,52 @@ admin.initializeApp({
 });
 
 
-const sendPushFunction = function sendPush(token, title, body) {
-
-  var message = {
-    // token: "c693_zwcRuqHiZEk-D0uxe:APA91bERmW9t_yI5g97OMZnUZE5BHVnxIlIv6GF8TD-qBX3Kv9yAjC_zQBi8TVBLol5lCVH79a-EORXXkHQ2p72QH7eSy23KAJvDe_O7SGT5jP5-jdrh8XMDzAnlJf6kMYy0VBQl3qIR",
-    topic: "all", 
-    data: {
-      title: "TITLE_HERE",
-      message: "MESSAGE_HERE",
-      body: "BODY_HERE",
-      // isScheduled: "true",
-      // scheduledTime: "2020-04-27 12:56:00"
-    },
-    notification: { 
-      title: "teste topic all", 
-      body: "funcionou? pelo back",
-      sound: "default"
-    }
-  };
+const sendPushFunction = function sendPush(token, title, body, scheduledTime) {
 
   // var message = {
-  //   to: "/topics/all",
+  //   token: token,
   //   notification: { 
-  //     title: "Notification title", 
-  //     body: "Notification body", 
-  //     sound: "default", 
-  //     click_action: "FCM_PLUGIN_ACTIVITY", 
-  //     icon: "fcm_push_icon" 
+  //     title: title, 
+  //     body: body
   //   },
   //   data: {
-  //     "message": "This is a Firebase Cloud Messaging Topic Message!",
+  //     title: title,
+  //     message: body,
+  //     body: body,
+  //     isScheduled: "true",
+  //     scheduledTime: scheduledTime // YYYY-MM-DD HH:MM:SS
   //   }
-  // }
+  // };
+
+  let message = {
+    notification: {
+        title: title,
+        body: body
+    },
+    data: {
+        isScheduled: "true",
+        scheduledTime: "2020-04-30 00:40:00"
+    },
+    // Apple specific settings
+    apns: {
+        headers: {
+            'apns-priority': '10',
+        },
+        payload: {
+            aps: {
+                sound: 'default',
+            }
+        },
+    },
+    android: {
+      priority: 'high',
+      notification: {
+          sound: 'default',
+      }
+    },
+    token: token,
+};
+
 
   admin.messaging().send(message)
     .then((response) => {
