@@ -142,7 +142,7 @@ router.get('/findByGenre', function(req, res) {
 	
 	Live.find(
 		{
-			genres: {'$regex': thename, $options:'i'}, 
+			genres: {'$regex': genreName, $options:'i'}, 
 			dateUTC: {
 	    		$gte: startToday
 	  		} 
