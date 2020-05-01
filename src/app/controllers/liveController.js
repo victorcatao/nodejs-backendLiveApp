@@ -60,8 +60,11 @@ router.post('/create', function(req, res) {
 router.post('/convertEverybody', function(req, res) {
 	Live.find().then(function(docs) {
     	docs.forEach(function(live, index) {
-    		live.dateUTC = moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("America/Sao_Paulo").tz("UTC").format()
-    		live.save()
+    		console.log(live.date)
+    		console.log(moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC"))
+
+    		// live.dateUTC = 
+    		// live.save()
     	})
   	});
     res.send()
@@ -174,7 +177,6 @@ router.post('/addToCalendar', async (req, res) => {
 	const liveDateTime = `${req.body.date} ${req.body.time}`
 	console.log(liveDateTime)
 
-	// add(3, hours) porque o node é UTC e BR é -3
 	const scheduledTime = moment(liveDateTime, "DD-MM-YYYY HH:mm").tz("America/Sao_Paulo").subtract(30, 'minutes').format('YYYY-MM-DD HH:mm:ss')
 	console.log(scheduledTime)
 
