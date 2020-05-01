@@ -256,7 +256,8 @@ router.get('/all', async (req, res) => {
   		},
   		function(err, docs){
   			docs.forEach(function(live, index){
-  				console.log(live.dateUTC - Date.now())
+  				let result = live.dateUTC - Date.now()
+  				console.log(live.dateUTC + ' = ' + result)
   				live.live = (live.dateUTC - Date.now()) < 0
   			})
     		res.send(docs)
