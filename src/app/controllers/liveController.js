@@ -61,6 +61,10 @@ router.post('/convertEverybody', function(req, res) {
 	Live.find().then(function(docs) {
     	docs.forEach(function(live, index) {
     		console.log(live.date + ' ' + live.time)
+    		var brasil    = moment.tz("28/04/2020 20:00", "America/Sao_Paulo");
+			var utc = brasil.clone().tz("UTC");
+			console.log(utc.format())
+			
     		console.log(moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("America/Sao_Paulo").clone().tz("UTC").format())
     		// isso aqui funcionou
     		// console.log(moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format())
