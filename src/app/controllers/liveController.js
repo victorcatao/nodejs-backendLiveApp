@@ -182,9 +182,9 @@ router.post('/addToCalendar', async (req, res) => {
 	console.log(scheduledTime)
 
 
-	// var j = schedule.scheduleJob(scheduledTime, function(){
-	// 	firebase.sendPush(firebaseToken, "Olho na Live!", `Daqui a pouco tem live com ${name}! Fique ligado ;)`)
-	// });
+	var j = schedule.scheduleJob(scheduledTime, function(){
+		firebase.sendPush(firebaseToken, "Olho na Live!", `Daqui a pouco tem live com ${name}! Fique ligado ;)`)
+	});
 	res.send()
 
 });
