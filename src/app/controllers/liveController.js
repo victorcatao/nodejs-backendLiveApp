@@ -136,7 +136,7 @@ router.get('/findByGenre', function(req, res) {
 	
 	Live.find(
 		{
-			genres: {'$regex': genreName, $options:'i'}, 
+			genres: {'$regex': thename, $options:'i'}, 
 			dateUTC: {
 	    		$gte: startToday
 	  		} 
@@ -255,6 +255,10 @@ router.get('/all', async (req, res) => {
 			}
   		},
   		function(err, docs){
+  			docs.forEach(function(live, index){
+  				console.log(live.dateUTC - Date.now())
+  				live.live = (live.dateUTC - Date.now()) < 0
+  			})
     		res.send(docs)
   		});
 
