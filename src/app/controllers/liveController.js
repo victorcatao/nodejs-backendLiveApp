@@ -70,18 +70,18 @@ router.post('/convertEverybody', function(req, res) {
 
 router.get('/tomorrow', function(req, res) {
 	
-	var tomorrowDate = new Date();
-	tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-
-	let options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-	let tomorrow = tomorrowDate.toLocaleString('pt-BR', options) // 2020-23-04
-	let dateSplit = tomorrow.replace('-', '/').split('/')
-
-  	let dateBrl = dateSplit[1] + "/" + dateSplit[0] + "/" + dateSplit[2]
-  	console.log(dateBrl)
+	const startTomorrow = moment().tz("UTC").add(1, 'day').startOf('day').subtract(3, 'hours').format()
+	console.log(startTomorrow)
+	const endTomorrow = moment().tz("UTC").add(1, 'day').endOf('day').subtract(3, 'hours').format()
+	console.log(endTomorrow)
 
 	Live.find(
-		{ "date": dateBrl },
+		{ 
+			dateUTC: {
+    			$gte: startTomorrow,
+    			$lte: endTomorrow
+  			} 
+  		},
 		function(err, docs){
 			if(err) {
 				return res.send(err)
@@ -95,16 +95,20 @@ router.get('/tomorrow', function(req, res) {
 
 
 router.get('/today', function(req, res) {
-	
-	let options = { day: 'numeric', month: '2-digit', year: 'numeric' };
-	let today = new Date().toLocaleString('pt-BR', options) // 2020-23-04
-	let dateSplit = today.replace('-', '/').split('/')
 
-  	let dateBrl = dateSplit[1] + "/" + dateSplit[0] + "/" + dateSplit[2]
-  	console.log(dateBrl)
+	const startToday = moment().tz("UTC").startOf('day').subtract(3, 'hours').format()
+	console.log(startToday)
+	const endToday = moment().tz("UTC").endOf('day').subtract(3, 'hours').format()
+	console.log(endToday)
+
 
 	Live.find(
-		{ "date": dateBrl },
+		{ 
+			dateUTC: {
+    			$gte: startToday,
+    			$lte: endToday
+  			} 
+  		},
 		function(err, docs){
 			if(err) {
 				return res.send(err)
