@@ -58,7 +58,7 @@ router.post('/create', function(req, res) {
 
 
 router.post('/convertEverybody', function(req, res) {
-	Live.find({id: '5eab9dda6a0e6d2bb50e546d'}).then(function(docs) {
+	Live.find().then(function(docs) {
     	docs.forEach(function(live, index) {
     		// console.log(`${live.date} ${live.time}`)
     		// console.log(moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format())
@@ -81,6 +81,12 @@ router.get('/tomorrow', function(req, res) {
     			$gte: startTomorrow,
     			$lte: endTomorrow
   			} 
+  		},
+  		[],
+  		{
+			sort: {
+			    dateUTC: 1 //Sort by Date Added DESC
+			}
   		},
 		function(err, docs){
 			if(err) {
@@ -106,6 +112,12 @@ router.get('/today', function(req, res) {
     			$lte: endToday
   			} 
   		},
+  		[],
+  		{
+			sort: {
+			    dateUTC: 1
+			}
+  		},
 		function(err, docs){
 			if(err) {
 				return res.send(err)
@@ -122,17 +134,25 @@ router.get('/findByGenre', function(req, res) {
 	const genreName = req.query.genre_name
 	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
 	
-	Live.find({
-		genres: {
-			$elemMatch: {
-				$regex: genreName,
-				$options: 'i' // case insensitive
-			} 
-		}, 
-		dateUTC: {
-    		$gte: startToday
-  		} 
-	}, function(err, docs){
+	Live.find(
+		{
+			genres: {
+				$elemMatch: {
+					$regex: genreName,
+					$options: 'i' // case insensitive
+				} 
+			}, 
+			dateUTC: {
+	    		$gte: startToday
+	  		} 
+		},
+  		[],
+  		{
+			sort: {
+			    dateUTC: 1
+			}
+  		},
+  		function(err, docs){
 			if(err) {
 				return res.send(err)
 			}
@@ -147,11 +167,12 @@ router.get('/genres', function(req, res) {
 	
 	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
 
-	Live.find({
+	Live.find(
+		{
 			dateUTC: {
 	    		$gte: startToday
 	  		}
-		}, 
+		},
 		function(err, docs){
 			if(err) {
 				return res.send(err)
@@ -166,7 +187,7 @@ router.get('/genres', function(req, res) {
 				})
 		})
 		return res.send(genres)
-		
+
 	});
 });
 
@@ -230,6 +251,12 @@ router.get('/all', async (req, res) => {
 			dateUTC: {
     			$gte: startToday
   			} 
+  		},
+  		[],
+  		{
+			sort: {
+			    dateUTC: 1 //Sort by Date Added DESC
+			}
   		},
   		function(err, docs){
     		res.send(docs)
