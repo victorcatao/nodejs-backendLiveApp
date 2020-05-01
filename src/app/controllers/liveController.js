@@ -131,17 +131,12 @@ router.get('/today', function(req, res) {
 
 router.get('/findByGenre', function(req, res) {
 	
-	const genreName = req.query.genre_name
+	const genreName = `^${req.query.genre_name}$`
 	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
 	
 	Live.find(
 		{
-			genres: {
-				$elemMatch: {
-					$regex: genreName,
-					$options: 'i' // case insensitive
-				} 
-			}, 
+			genres: {'$regex': genreName, $options:'i'}, 
 			dateUTC: {
 	    		$gte: startToday
 	  		} 
