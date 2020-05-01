@@ -72,8 +72,10 @@ router.post('/convertEverybody', function(req, res) {
 
 router.get('/tomorrow', function(req, res) {
 	
-	const startTomorrow = moment().tz("UTC").add(1, 'day').startOf('day').add(1, 'seconds').format()
-	const endTomorrow = moment().tz("UTC").add(1, 'day').endOf('day').format()
+	const startTomorrow = moment().tz("UTC").startOf('day').add(1, 'day').add(3, 'hours').format()
+	console.log(startTomorrow)
+	const endTomorrow = moment().tz("UTC").add(1, 'day').endOf('day').add(3, 'hours').format()
+	console.log(endTomorrow)
 
 	Live.find(
 		{ 
@@ -96,8 +98,8 @@ router.get('/tomorrow', function(req, res) {
 
 router.get('/today', function(req, res) {
 
-	const startToday = moment().tz("UTC").startOf('day').add(1, 'seconds').format()
-	const endToday = moment().tz("UTC").endOf('day').format()
+	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
+	const endToday = moment().tz("UTC").endOf('day').add(3, 'hours').format()
 
 	Live.find(
 		{ 
