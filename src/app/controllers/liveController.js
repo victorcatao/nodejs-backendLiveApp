@@ -202,13 +202,14 @@ router.get('/genres', function(req, res) {
 router.post('/addToCalendar', async (req, res) => {
 
 	const firebaseToken = req.body.firebaseToken
+	console.log('Token: ' + firebaseToken)
 	const name = req.body.name
 
 	const liveDateTime = `${req.body.date} ${req.body.time}`
-	console.log(liveDateTime)
+	console.log('Live dateTime: ' + liveDateTime)
 
 	const scheduledTime = moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').subtract(15, 'minutes').format('YYYY-MM-DD HH:mm:ss')
-	console.log(scheduledTime)
+	console.log('Disparo: ' + scheduledTime)
 
 
 	var j = schedule.scheduleJob(scheduledTime, function(){
