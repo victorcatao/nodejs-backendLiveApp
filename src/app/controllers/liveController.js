@@ -60,10 +60,10 @@ router.post('/create', function(req, res) {
 router.post('/convertEverybody', function(req, res) {
 	Live.find({id: '5eab9dda6a0e6d2bb50e546d'}).then(function(docs) {
     	docs.forEach(function(live, index) {
-    		console.log(`${live.date} ${live.time}`)
-    		console.log(moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format())
-    		// live.dateUTC = moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format()
-    		// live.save()
+    		// console.log(`${live.date} ${live.time}`)
+    		// console.log(moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format())
+    		live.dateUTC = moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format()
+    		live.save()
     	})
   	});
     res.send()
@@ -73,9 +73,7 @@ router.post('/convertEverybody', function(req, res) {
 router.get('/tomorrow', function(req, res) {
 	
 	const startTomorrow = moment().tz("UTC").startOf('day').add(1, 'day').add(3, 'hours').format()
-	console.log(startTomorrow)
 	const endTomorrow = moment().tz("UTC").add(1, 'day').endOf('day').add(3, 'hours').format()
-	console.log(endTomorrow)
 
 	Live.find(
 		{ 
@@ -122,7 +120,7 @@ router.get('/today', function(req, res) {
 router.get('/findByGenre', function(req, res) {
 	
 	const genreName = req.query.genre_name
-	console.log(genreName)
+	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
 
 	Live.find({ 
 		genres: {
@@ -130,7 +128,10 @@ router.get('/findByGenre', function(req, res) {
 				$regex: genreName,
 				$options: 'i' // case insensitive
 			} 
-		} 
+		}, 
+		dateUTC: {
+    		$gte: startToday
+  		} 
 	}, function(err, docs){
 			if(err) {
 				return res.send(err)
@@ -213,9 +214,17 @@ router.post('/addToCalendar', async (req, res) => {
 
 router.get('/all', async (req, res) => {
 
-  Live.find().then(function(docs){
-    res.send(docs)
-  });
+  	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
+
+	Live.find(
+		{ 
+			dateUTC: {
+    			$gte: startToday
+  			} 
+  		},
+  		function(err, docs){
+    		res.send(docs)
+  		});
 
 });
 
