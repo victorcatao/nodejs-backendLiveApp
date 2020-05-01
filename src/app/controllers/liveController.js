@@ -33,7 +33,7 @@ router.post('/sendSuggestion', function(req, res) {
 
 router.post('/create', function(req, res) {
 
-	req.body.dateUTC = moment(`${req.body.date} ${req.body.time}`, "DD-MM-YYYY HH:mm").tz("America/Sao_Paulo").tz("UTC")
+	req.body.dateUTC = moment(`${req.body.date} ${req.body.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format()
 
 	if(req.body.date == null || req.body.date.length != 10) {
 		return res.status(400).send({'errorMessage': 'Data no formato inválido. Correto: DD/MM/YYYY HH:mm'})
@@ -60,11 +60,6 @@ router.post('/create', function(req, res) {
 router.post('/convertEverybody', function(req, res) {
 	Live.find().then(function(docs) {
     	docs.forEach(function(live, index) {
-    		
-    		// isso aqui funcionou
-    		console.log(`${live.date} ${live.time}`)
-    		console.log(moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format())
-
     		live.dateUTC = moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format()
     		live.save()
     	})
