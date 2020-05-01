@@ -7,22 +7,7 @@ admin.initializeApp({
 });
 
 
-const sendPushFunction = function sendPush(token, title, body, scheduledTime) {
-
-  // var message = {
-  //   token: token,
-  //   notification: { 
-  //     title: title, 
-  //     body: body
-  //   },
-  //   data: {
-  //     title: title,
-  //     message: body,
-  //     body: body,
-  //     isScheduled: "true",
-  //     scheduledTime: scheduledTime // YYYY-MM-DD HH:MM:SS
-  //   }
-  // };
+const sendPushFunction = function sendPush(token, title, body) {
 
   let message = {
     notification: {
@@ -30,8 +15,8 @@ const sendPushFunction = function sendPush(token, title, body, scheduledTime) {
         body: body
     },
     data: {
-        isScheduled: "true",
-        scheduledTime: "2020-04-30 00:40:00"
+        // isScheduled: "true",
+        // scheduledTime: "2020-04-30 00:40:00"
     },
     // Apple specific settings
     apns: {
