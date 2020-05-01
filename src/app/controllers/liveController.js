@@ -65,8 +65,8 @@ router.post('/convertEverybody', function(req, res) {
     		console.log(`${live.date} ${live.time}`)
     		console.log(moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format())
 
-    		// live.dateUTC = 
-    		// live.save()
+    		live.dateUTC = moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format()
+    		live.save()
     	})
   	});
     res.send()
