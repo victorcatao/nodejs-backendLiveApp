@@ -58,10 +58,12 @@ router.post('/create', function(req, res) {
 
 
 router.post('/convertEverybody', function(req, res) {
-	Live.find().then(function(docs) {
+	Live.find({id: '5eab9dda6a0e6d2bb50e546d'}).then(function(docs) {
     	docs.forEach(function(live, index) {
-    		live.dateUTC = moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format()
-    		live.save()
+    		console.log(`${live.date} ${live.time}`)
+    		console.log(moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format())
+    		// live.dateUTC = moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format()
+    		// live.save()
     	})
   	});
     res.send()
@@ -70,10 +72,8 @@ router.post('/convertEverybody', function(req, res) {
 
 router.get('/tomorrow', function(req, res) {
 	
-	const startTomorrow = moment().tz("UTC").add(1, 'day').startOf('day').subtract(3, 'hours').format()
-	console.log(startTomorrow)
-	const endTomorrow = moment().tz("UTC").add(1, 'day').endOf('day').subtract(3, 'hours').format()
-	console.log(endTomorrow)
+	const startTomorrow = moment().tz("UTC").add(1, 'day').startOf('day').add(1, 'seconds').format()
+	const endTomorrow = moment().tz("UTC").add(1, 'day').endOf('day').format()
 
 	Live.find(
 		{ 
@@ -96,11 +96,8 @@ router.get('/tomorrow', function(req, res) {
 
 router.get('/today', function(req, res) {
 
-	const startToday = moment().tz("UTC").startOf('day').subtract(3, 'hours').format()
-	console.log(startToday)
-	const endToday = moment().tz("UTC").endOf('day').subtract(3, 'hours').format()
-	console.log(endToday)
-
+	const startToday = moment().tz("UTC").startOf('day').add(1, 'seconds').format()
+	const endToday = moment().tz("UTC").endOf('day').format()
 
 	Live.find(
 		{ 
