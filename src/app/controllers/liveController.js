@@ -92,6 +92,9 @@ router.get('/tomorrow', function(req, res) {
 			if(err) {
 				return res.send(err)
 			}
+			docs.forEach(function(live, index){
+  				live.live = (live.dateUTC - Date.now()) < 0
+  			})
 			return res.send(docs)
 		}
 	);
@@ -122,6 +125,9 @@ router.get('/today', function(req, res) {
 			if(err) {
 				return res.send(err)
 			}
+			docs.forEach(function(live, index){
+  				live.live = (live.dateUTC - Date.now()) < 0
+  			})
 			return res.send(docs)
 		}
 	);
@@ -151,6 +157,9 @@ router.get('/findByGenre', function(req, res) {
 			if(err) {
 				return res.send(err)
 			}
+			docs.forEach(function(live, index){
+  				live.live = (live.dateUTC - Date.now()) < 0
+  			})
 			return res.send(docs)
 		}
 	);
@@ -256,8 +265,6 @@ router.get('/all', async (req, res) => {
   		},
   		function(err, docs){
   			docs.forEach(function(live, index){
-  				let result = live.dateUTC - Date.now()
-  				console.log(live.dateUTC + ' = ' + result)
   				live.live = (live.dateUTC - Date.now()) < 0
   			})
     		res.send(docs)
