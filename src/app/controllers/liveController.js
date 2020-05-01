@@ -178,9 +178,6 @@ router.post('/addToCalendar', async (req, res) => {
 	const liveDateTime = `${req.body.date} ${req.body.time}`
 	console.log(liveDateTime)
 
-	// const scheduledTime = moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').subtract(30, 'minutes').format('YYYY-MM-DD HH:mm:ss')
-	// console.log(scheduledTime)
-
 	const scheduledTime = moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').subtract(30, 'minutes').format('YYYY-MM-DD HH:mm:ss')
 	console.log(scheduledTime)
 
