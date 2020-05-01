@@ -121,8 +121,8 @@ router.get('/findByGenre', function(req, res) {
 	
 	const genreName = req.query.genre_name
 	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
-
-	Live.find({ 
+	
+	Live.find({
 		genres: {
 			$elemMatch: {
 				$regex: genreName,
@@ -145,20 +145,28 @@ router.get('/findByGenre', function(req, res) {
 
 router.get('/genres', function(req, res) {
 	
-	Live.find({}, function(err, docs){
-		if(err) {
-			return res.send(err)
-		}
-		var genres = ["Sertanejo"] // comecar com esse por questoes de marketing :D
+	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
 
-		docs.forEach(function(live, index){
-			live.genres.forEach(function(genre, i){
-				if(genres.includes(genre) == false){
-					genres.push(genre)
-				}
-			})
+	Live.find({
+			dateUTC: {
+	    		$gte: startToday
+	  		}
+		}, 
+		function(err, docs){
+			if(err) {
+				return res.send(err)
+			}
+			var genres = ["Sertanejo"] // comecar com esse por questoes de marketing :D
+
+			docs.forEach(function(live, index){
+				live.genres.forEach(function(genre, i){
+					if(genres.includes(genre) == false){
+						genres.push(genre)
+					}
+				})
 		})
 		return res.send(genres)
+		
 	});
 });
 
