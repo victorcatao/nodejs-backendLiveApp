@@ -33,6 +33,7 @@ router.post('/sendSuggestion', function(req, res) {
 
 router.post('/create', function(req, res) {
 
+	req.body.dateUTC = moment(`${req.body.date} ${req.body.time}`, "DD-MM-YYYY HH:mm").tz("America/Sao_Paulo").tz("UTC")
 
 	if(req.body.date == null || req.body.date.length != 10) {
 		return res.status(400).send({'errorMessage': 'Data no formato inválido. Correto: DD/MM/YYYY HH:mm'})
@@ -53,6 +54,17 @@ router.post('/create', function(req, res) {
 			res.send(live)
 		}
 	})
+});
+
+
+router.post('/convertEverybody', function(req, res) {
+	Live.find().then(function(docs) {
+    	docs.forEach(function(live, index) {
+    		live.dateUTC = moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("America/Sao_Paulo").tz("UTC").format()
+    		live.save()
+    	})
+  	});
+    res.send()
 });
 
 
@@ -154,9 +166,6 @@ router.get('/genres', function(req, res) {
 
 
 
-
-
-
 router.post('/addToCalendar', async (req, res) => {
 
 	const firebaseToken = req.body.firebaseToken
@@ -165,7 +174,8 @@ router.post('/addToCalendar', async (req, res) => {
 	const liveDateTime = `${req.body.date} ${req.body.time}`
 	console.log(liveDateTime)
 
-	const scheduledTime = moment(liveDateTime, "DD-MM-YYYY HH:mm").add(3, 'h').subtract(30, 'minutes').format('YYYY-MM-DD HH:mm:ss')
+	// add(3, hours) porque o node é UTC e BR é -3
+	const scheduledTime = moment(liveDateTime, "DD-MM-YYYY HH:mm").tz("America/Sao_Paulo").subtract(30, 'minutes').format('YYYY-MM-DD HH:mm:ss')
 	console.log(scheduledTime)
 
 	var j = schedule.scheduleJob(scheduledTime, function(){

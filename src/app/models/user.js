@@ -32,8 +32,9 @@ const UserSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
-    select: false
+    // select: false
   },
+  dateUTC: Date
 });
 
 UserSchema.pre('save', async function(next){

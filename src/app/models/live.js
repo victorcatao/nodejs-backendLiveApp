@@ -47,6 +47,9 @@ const LiveSchema = new mongoose.Schema({
   live: {
     type: Boolean,
     default: false
+  }, 
+  dateUTC: {
+    type: Date 
   }
 });
 
