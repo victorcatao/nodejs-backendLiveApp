@@ -5,7 +5,7 @@ const firebase = require('../helpers/firebase')
 const Live = require('../models/live');
 const Suggestion = require('../models/suggestion')
 const schedule = require('node-schedule');
-
+const mongoose = require('mongoose')
 
 
 router.post('/sendSuggestion', function(req, res) {
@@ -329,6 +329,27 @@ function setLiveIsLiveNow(live) {
 }
 
 
+
+
+
+router.post('/updateMyLives', async (req, res) => {
+
+	var ids = []
+    req.body.ids.forEach(function(id, index){
+    	ids.push(mongoose.Types.ObjectId(id))
+    })
+
+	Live.find({
+		'_id': { $in: ids}
+	    }
+	    ,function(err, docs){
+  			docs.forEach(function(live, index){
+  				setLiveIsLiveNow(live)
+  			})
+    		res.send(docs)
+  		});
+
+});
 
 
 
