@@ -6,7 +6,6 @@ admin.initializeApp({
   databaseURL: "https://liveapp-275503.firebaseio.com"
 });
 
-
 const sendPushFunction = function sendPush(token, title, body) {
 
   let message = {

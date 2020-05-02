@@ -4,8 +4,21 @@ const router = express.Router();
 const firebase = require('../helpers/firebase')
 const Live = require('../models/live');
 const Suggestion = require('../models/suggestion')
+const PushScheduled = require('../models/pushScheduled')
 const schedule = require('node-schedule');
 const mongoose = require('mongoose')
+
+
+// Isso é pra reprogramar as rotinas que morreram por conta do servidor ter sido restartado
+PushScheduled.find().then(
+	function(docs) {
+		docs.forEach(function(push, index) {
+			console.log('RECUPERANDO PUSH QUE NAO FOI ENVIADO')
+			schedulePush(push.firebaseToken, push.name, push.date, push.time, push.id)
+		})
+	}
+);
+
 
 
 router.post('/sendSuggestion', function(req, res) {
@@ -254,25 +267,74 @@ router.get('/genres', function(req, res) {
 router.post('/addToCalendar', async (req, res) => {
 
 	const firebaseToken = req.body.firebaseToken
-	console.log('Token: ' + firebaseToken)
 	const name = req.body.name
+	const date = req.body.date
+	const time = req.body.time
 
-	const liveDateTime = `${req.body.date} ${req.body.time}`
-	console.log('Live dateTime: ' + liveDateTime)
+	var push = new PushScheduled(
+			{
+				firebaseToken: firebaseToken,
+				name: name,
+				date: date,
+			 	time: time,
+				scheduledTime: getScheduledTimeToPush(date, time)
+			}
+		);
 
-	const scheduledTime = moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').subtract(15, 'minutes').format('YYYY-MM-DD HH:mm:ss')
+	push.save(
+		function(error, doc) {
+			if(error) {
+				console.log(error)
+			}
+			console.log(doc)
+			schedulePush(firebaseToken, name, date, time, doc.id)
+			res.send()
+		}
+	)
+
+	// const liveDateTime = `${req.body.date} ${req.body.time}`
+
+	// const scheduledTime = moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').subtract(15, 'minutes').format('YYYY-MM-DD HH:mm:ss')
+
+	// var j = schedule.scheduleJob(scheduledTime, function(){
+	// 	firebase.sendPush(firebaseToken, "Olho na Live!", `Daqui a pouco tem live com ${name}! Fique ligado ;)`)
+	// });
+	// res.send()
+
+});
+
+function schedulePush(firebaseToken, name, date, time, pushMongoDBId){
+
+	const scheduledTime = getScheduledTimeToPush(date, time)
+	console.log('firebaseToken: ' + firebaseToken)
+	console.log('name: ' + name)
+	console.log('date: ' + date)
+	console.log('time: ' + time)
 	console.log('Disparo: ' + scheduledTime)
+	console.log('pushMongoDBId: ' + pushMongoDBId)
 
 
 	var j = schedule.scheduleJob(scheduledTime, function(){
 		firebase.sendPush(firebaseToken, "Olho na Live!", `Daqui a pouco tem live com ${name}! Fique ligado ;)`)
+
+		PushScheduled.deleteOne({ '_id': pushMongoDBId }, function (err) {
+		  if (err) {
+		  	console.log(`Push enviado mas NÃO DELETADO: ${pushMongoDBId}`)
+		  } else {
+		  	console.log('PUSH ENVIADO E DELETADO COM SUCESSO')
+		  }
+		});
+
+
 	});
-	res.send()
 
-});
-
+}
 
 
+function getScheduledTimeToPush(date, time) {
+	const liveDateTime = `${date} ${time}`
+	return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').subtract(15, 'minutes').format('YYYY-MM-DD HH:mm:ss')
+}
 
 
 
