@@ -165,6 +165,8 @@ router.get('/findByGenre', function(req, res) {
   		}
   	}
 
+  	console.log(jsonFind)
+
 	Live.find(
 		jsonFind,
   		[],
