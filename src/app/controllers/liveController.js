@@ -31,6 +31,28 @@ router.post('/sendSuggestion', function(req, res) {
 });
 
 
+
+
+router.post('/createMinduca', function(req, res) {
+
+	req.body.forEach(function(live, index){
+		req.body[index].dateUTC = moment(`${req.body[index].date} ${req.body[index].time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours')
+	})
+
+	console.log(req.body)
+
+	Live.insertMany(req.body)
+	    .then(function (docs) {
+	        res.json(docs);
+	    })
+	    .catch(function (err) {
+	        res.status(500).send(err);
+	    });
+});
+
+
+
+
 router.post('/create', function(req, res) {
 
 	if(req.body.date == null || req.body.date.length != 10) {
