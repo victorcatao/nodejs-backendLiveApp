@@ -324,6 +324,8 @@ router.get('/all', async (req, res) => {
   		}
   	}
 
+  	console.log(jsonFind)
+
 	Live.find(
 		jsonFind,
   		[],
