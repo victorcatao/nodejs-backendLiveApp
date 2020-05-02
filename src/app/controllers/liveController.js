@@ -323,7 +323,7 @@ router.get('/all', async (req, res) => {
     		$gte: startToday
   		}
   	}
-
+	console.log(req.query.findRecord)
   	console.log(jsonFind)
 
 	Live.find(
