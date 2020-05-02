@@ -75,7 +75,7 @@ router.get('/tomorrow', function(req, res) {
 	const startTomorrow = moment().tz("UTC").startOf('day').add(1, 'day').add(3, 'hours').format()
 	const endTomorrow = moment().tz("UTC").add(1, 'day').endOf('day').add(3, 'hours').format()
 
-	const findRecord = req.query.findRecord == 'true'
+	const findRecord = (req.query.findRecord == 'true') || (req.query.findRecord == true)
   	const jsonFind = { 
   		isRecorded: findRecord
   	}
@@ -115,7 +115,7 @@ router.get('/today', function(req, res) {
 	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
 	const endToday = moment().tz("UTC").endOf('day').add(3, 'hours').format()
 	
-	const findRecord = req.query.findRecord == 'true'
+	const findRecord = (req.query.findRecord == 'true') || (req.query.findRecord == true)
   	const jsonFind = { 
   		isRecorded: findRecord
   	}
@@ -153,7 +153,7 @@ router.get('/findByGenre', function(req, res) {
 	
 	const genreName = `^${req.query.genre_name}$`
 	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
-	const findRecord = req.query.findRecord == 'true'
+	const findRecord = (req.query.findRecord == 'true') || (req.query.findRecord == true)
   	const jsonFind = { 
   		isRecorded: findRecord,
   		genres: {'$regex': genreName, $options:'i'}
@@ -190,7 +190,7 @@ router.get('/findByGenre', function(req, res) {
 router.get('/genres', function(req, res) {
 	
 	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
-	const findRecord = req.query.findRecord == 'true'
+	const findRecord = (req.query.findRecord == 'true') || (req.query.findRecord == true)
   	const jsonFind = { isRecorded: findRecord }
   	
   	if(findRecord == false) {
