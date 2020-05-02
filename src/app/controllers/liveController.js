@@ -60,9 +60,9 @@ router.post('/create', function(req, res) {
 router.post('/convertEverybody', function(req, res) {
 	Live.find().then(function(docs) {
     	docs.forEach(function(live, index) {
-    		// console.log(`${live.date} ${live.time}`)
-    		// console.log(moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format())
-    		live.dateUTC = moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format()
+    		// live.dateUTC = moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format()
+    		// live.save()
+    		live.isRecorded = false
     		live.save()
     	})
   	});
@@ -75,13 +75,20 @@ router.get('/tomorrow', function(req, res) {
 	const startTomorrow = moment().tz("UTC").startOf('day').add(1, 'day').add(3, 'hours').format()
 	const endTomorrow = moment().tz("UTC").add(1, 'day').endOf('day').add(3, 'hours').format()
 
+	const findRecord = req.query.findRecord == 'true'
+  	const jsonFind = { 
+  		isRecorded: findRecord
+  	}
+  	
+  	if(findRecord == false) {
+  		jsonFind.dateUTC = {
+    		$gte: startTomorrow,
+    		$lte: endTomorrow
+  		}
+  	}
+
 	Live.find(
-		{ 
-			dateUTC: {
-    			$gte: startTomorrow,
-    			$lte: endTomorrow
-  			} 
-  		},
+		jsonFind,
   		[],
   		{
 			sort: {
@@ -93,7 +100,7 @@ router.get('/tomorrow', function(req, res) {
 				return res.send(err)
 			}
 			docs.forEach(function(live, index){
-  				live.live = (live.dateUTC - Date.now()) < 0
+  				setLiveIsLiveNow(live)
   			})
 			return res.send(docs)
 		}
@@ -107,14 +114,21 @@ router.get('/today', function(req, res) {
 
 	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
 	const endToday = moment().tz("UTC").endOf('day').add(3, 'hours').format()
+	
+	const findRecord = req.query.findRecord == 'true'
+  	const jsonFind = { 
+  		isRecorded: findRecord
+  	}
+  	
+  	if(findRecord == false) {
+  		jsonFind.dateUTC = {
+    		$gte: startToday,
+    		$lte: endToday
+  		}
+  	}
 
 	Live.find(
-		{ 
-			dateUTC: {
-    			$gte: startToday,
-    			$lte: endToday
-  			} 
-  		},
+		jsonFind,
   		[],
   		{
 			sort: {
@@ -126,7 +140,7 @@ router.get('/today', function(req, res) {
 				return res.send(err)
 			}
 			docs.forEach(function(live, index){
-  				live.live = (live.dateUTC - Date.now()) < 0
+  				setLiveIsLiveNow(live)
   			})
 			return res.send(docs)
 		}
@@ -139,14 +153,20 @@ router.get('/findByGenre', function(req, res) {
 	
 	const genreName = `^${req.query.genre_name}$`
 	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
-	
+	const findRecord = req.query.findRecord == 'true'
+  	const jsonFind = { 
+  		isRecorded: findRecord,
+  		genres: {'$regex': genreName, $options:'i'}
+  	}
+  	
+  	if(findRecord == false) {
+  		jsonFind.dateUTC = {
+    		$gte: startToday
+  		}
+  	}
+
 	Live.find(
-		{
-			genres: {'$regex': genreName, $options:'i'}, 
-			dateUTC: {
-	    		$gte: startToday
-	  		} 
-		},
+		jsonFind,
   		[],
   		{
 			sort: {
@@ -158,7 +178,7 @@ router.get('/findByGenre', function(req, res) {
 				return res.send(err)
 			}
 			docs.forEach(function(live, index){
-  				live.live = (live.dateUTC - Date.now()) < 0
+  				setLiveIsLiveNow(live)
   			})
 			return res.send(docs)
 		}
@@ -170,13 +190,17 @@ router.get('/findByGenre', function(req, res) {
 router.get('/genres', function(req, res) {
 	
 	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
+	const findRecord = req.query.findRecord == 'true'
+  	const jsonFind = { isRecorded: findRecord }
+  	
+  	if(findRecord == false) {
+  		jsonFind.dateUTC = {
+    		$gte: startToday
+  		}
+  	}
 
 	Live.find(
-		{
-			dateUTC: {
-	    		$gte: startToday
-	  		}
-		},
+		jsonFind,
 		function(err, docs){
 			if(err) {
 				return res.send(err)
@@ -234,11 +258,51 @@ router.post('/addToCalendar', async (req, res) => {
 
 
 
+router.get('/getSearchData', async (req, res) => {
+
+	Live.find(
+		{},
+  		[],
+  		{
+			sort: {
+			    dateUTC: 1 //Sort by Date Added DESC
+			}
+  		},
+  		function(err, docs){
+  			var liveNow = []
+  			var others = []
+  			var recorded = []
+  			docs.forEach(function(live, index){
+  				setLiveIsLiveNow(live)
+				var diff = live.dateUTC - Date.now()
+				var isFutureLive = diff > 0 
+  				
+  				if(live.isRecorded == true){
+  					recorded.push(live)
+  				} else if(live.live == true && isFutureLive == false && live.isRecorded == false) {
+  					liveNow.push(live)
+  				} else if (isFutureLive) {
+  					others.push(live)
+  				}
+  			})
+    		res.send(
+    			{
+    				liveNow: liveNow,
+    				others: others,
+    				recorded: recorded
+    			}
+    		)
+  		});
+
+});
 
 
 
-
-
+function setLiveIsLiveNow(live) {
+	var diff = live.dateUTC - Date.now()
+	var sixHoursInMillis = 21600000
+  	live.live = diff < 0  && diff > -sixHoursInMillis
+}
 
 
 
@@ -250,13 +314,18 @@ router.post('/addToCalendar', async (req, res) => {
 router.get('/all', async (req, res) => {
 
   	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
+  	
+  	const findRecord = req.query.findRecord == 'true'
+  	const jsonFind = { isRecorded: findRecord }
+
+  	if(findRecord == false) {
+  		jsonFind.dateUTC = {
+    		$gte: startToday
+  		}
+  	}
 
 	Live.find(
-		{ 
-			dateUTC: {
-    			$gte: startToday
-  			} 
-  		},
+		jsonFind,
   		[],
   		{
 			sort: {
@@ -265,7 +334,7 @@ router.get('/all', async (req, res) => {
   		},
   		function(err, docs){
   			docs.forEach(function(live, index){
-  				live.live = (live.dateUTC - Date.now()) < 0
+  				setLiveIsLiveNow(live)
   			})
     		res.send(docs)
   		});

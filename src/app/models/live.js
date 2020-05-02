@@ -48,6 +48,10 @@ const LiveSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   }, 
+  isRecorded: {
+    type: Boolean,
+    default: false
+  },
   dateUTC: {
     type: Date 
   }
