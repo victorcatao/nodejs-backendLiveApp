@@ -335,24 +335,11 @@ function setLiveIsLiveNow(live) {
 
 
 
-router.get('/all', async (req, res) => {
+router.get('/getAllLives', async (req, res) => {
 
-  	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
   	
-  	const findRecord = (req.query.findRecord == 'true') || (req.query.findRecord == true)
-  	const jsonFind = { isRecorded: findRecord }
-
-  	if(findRecord == false) {
-  		jsonFind.dateUTC = {
-    		$gte: startToday
-  		}
-  	}
-
-	console.log(req.query.findRecord)
-  	console.log(jsonFind)
-
 	Live.find(
-		jsonFind,
+		{},
   		[],
   		{
 			sort: {
@@ -367,6 +354,10 @@ router.get('/all', async (req, res) => {
   		});
 
 });
+
+
+
+
 
 
 module.exports = app => app.use('/lives', router);
