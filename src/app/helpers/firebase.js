@@ -34,8 +34,11 @@ const sendPushFunction = function sendPush(token, title, body) {
           sound: 'default',
       }
     },
-    token: token,
-};
+    token: token
+  };
+
+  console.log('VAI ENVIAR O PAYLOAD ABAIXO')
+  console.log(message)
 
 
   admin.messaging().send(message)

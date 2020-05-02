@@ -97,8 +97,8 @@ router.post('/convertEverybody', function(req, res) {
     	docs.forEach(function(live, index) {
     		// live.dateUTC = moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format()
     		// live.save()
-    		live.isRecorded = false
-    		live.save()
+    		// live.isRecorded = false
+    		// live.save()
     	})
   	});
     res.send()
