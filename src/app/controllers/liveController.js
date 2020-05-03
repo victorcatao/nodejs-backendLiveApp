@@ -107,8 +107,11 @@ router.post('/convertEverybody', function(req, res) {
 
 router.get('/tomorrow', function(req, res) {
 	
-	const startTomorrow = moment().tz("UTC").startOf('day').add(1, 'day').add(3, 'hours').format()
-	const endTomorrow = moment().tz("UTC").add(1, 'day').endOf('day').add(3, 'hours').format()
+	// const startTomorrow = moment().tz("UTC").startOf('day').add(1, 'day').add(3, 'hours').format()
+	// const endTomorrow = moment().tz("UTC").add(1, 'day').endOf('day').add(3, 'hours').format()
+
+	const startTomorrow = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').add(1, 'day').format()
+	const endTomorrow = moment().tz("UTC").subtract(3, 'hours').endOf('day').add(3, 'hours').add(1, 'day').format()
 
 	const findRecord = (req.query.findRecord == 'true') || (req.query.findRecord == true)
   	const jsonFind = { 
@@ -148,9 +151,7 @@ router.get('/tomorrow', function(req, res) {
 router.get('/today', function(req, res) {
 
 	const startToday = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').format()
-	console.log(startToday)
 	const endToday = moment().tz("UTC").subtract(3, 'hours').endOf('day').add(3, 'hours').format()
-	console.log(endToday)
 	// const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
 	// const endToday = moment().tz("UTC").endOf('day').add(3, 'hours').format()
 	
