@@ -147,8 +147,8 @@ router.get('/tomorrow', function(req, res) {
 
 router.get('/today', function(req, res) {
 
-	const startToday = moment().tz("UTC").startOf('day').add(3, 'hours').add(1, 'seconds').format()
-	const endToday = moment().tz("UTC").endOf('day').add(3, 'hours').format()
+	const startToday = moment().tz("UTC").startOf('day').subtract(3, 'hours').add(1, 'seconds').format()
+	const endToday = moment().tz("UTC").endOf('day').subtract(3, 'hours').format()
 	
 	const findRecord = (req.query.findRecord == 'true') || (req.query.findRecord == true)
   	const jsonFind = { 
