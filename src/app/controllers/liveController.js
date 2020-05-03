@@ -90,15 +90,31 @@ router.post('/create', function(req, res) {
 
 
 router.post('/convertEverybody', function(req, res) {
-	Live.find().then(function(docs) {
-    	docs.forEach(function(live, index) {
-    		// live.dateUTC = moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format()
-    		// live.save()
-    		// live.isRecorded = false
-    		// live.save()
-    	})
-  	});
-    res.send()
+	// Live.find().then(function(docs) {
+ //    	docs.forEach(function(live, index) {
+ //    		// live.dateUTC = moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format()
+ //    		// live.save()
+ //    		// live.isRecorded = false
+ //    		// live.save()
+ //    	})
+ //  	});
+ 	
+ 	PushScheduled.remove(
+ 		{ 
+ 			$or: [
+ 				{ 'firebaseToken': null }, 
+ 				{ 'firebaseToken': ''}
+ 			] 
+ 		}, 
+ 		function(err, docs) {
+	 		if(err) {
+	 			res.send({error: err})
+	 		} else {
+	 			res.send(docs)
+	 		}
+ 		}
+ 	);
+
 });
 
 
@@ -264,6 +280,11 @@ router.get('/genres', function(req, res) {
 router.post('/addToCalendar', async (req, res) => {
 
 	const firebaseToken = req.body.firebaseToken
+
+	if(firebaseToken == '' || firebaseToken == null || firebaseToken == undefined) {
+		return res.send() // erro de token vazio
+	} 
+
 	const name = req.body.name
 	const date = req.body.date
 	const time = req.body.time
