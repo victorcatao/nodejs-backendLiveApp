@@ -295,7 +295,8 @@ router.post('/addToCalendar', async (req, res) => {
 				name: name,
 				date: date,
 			 	time: time,
-				scheduledTime: getScheduledTimeToPush(date, time)
+				scheduledTime: getScheduledTimeToPush(date, time),
+				platform: req.body.platform
 			}
 		);
 

@@ -5,7 +5,8 @@ const PushScheduledSchema = new mongoose.Schema({
   name: String,
   date: String,
   time: String,
-  scheduledTime: String
+  scheduledTime: String,
+  platform: String
 });
 
 PushScheduledSchema.set('toJSON', {
