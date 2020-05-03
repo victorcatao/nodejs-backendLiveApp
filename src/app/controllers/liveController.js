@@ -404,8 +404,14 @@ router.post('/updateMyLives', async (req, res) => {
     	ids.push(mongoose.Types.ObjectId(id))
     })
 
-	Live.find({
-		'_id': { $in: ids}
+    const startToday = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').format()
+
+	Live.find(
+		{
+			'_id': { $in: ids },
+			dateUTC: {
+	    		$gte: startToday
+  			}
 	    }
 	    ,function(err, docs){
   			docs.forEach(function(live, index){
