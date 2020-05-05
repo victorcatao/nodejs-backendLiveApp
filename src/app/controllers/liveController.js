@@ -462,7 +462,7 @@ router.get('/all', async (req, res) => {
 
 
 
-router.post('/sendSuggest', function(req, res) {
+router.post('/sendSugestion', function(req, res) {
 
 
 	if(req.body.artist == null) {
