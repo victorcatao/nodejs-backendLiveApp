@@ -13,7 +13,7 @@ const mongoose = require('mongoose')
 PushScheduled.find().then(
 	function(docs) {
 		docs.forEach(function(push, index) {
-			console.log('RECUPERANDO PUSH QUE NAO FOI ENVIADO')
+			// console.log('RECUPERANDO PUSH QUE NAO FOI ENVIADO')
 			schedulePush(push.firebaseToken, push.name, push.date, push.time, push.id)
 		})
 	}
@@ -213,7 +213,7 @@ router.get('/findByGenre', function(req, res) {
   		}
   	}
 
-  	console.log(jsonFind)
+  	// console.log(jsonFind)
 
 	Live.find(
 		jsonFind,
@@ -305,7 +305,7 @@ router.post('/addToCalendar', async (req, res) => {
 			if(error) {
 				console.log(error)
 			}
-			console.log(doc)
+			// console.log(doc)
 			schedulePush(firebaseToken, name, date, time, doc.id)
 			res.send()
 		}
@@ -322,21 +322,38 @@ function schedulePush(firebaseToken, name, date, time, pushMongoDBId){
 
 		PushScheduled.deleteOne({ '_id': pushMongoDBId }, function (err) {
 		  if (err) {
-		  	console.log(`Push enviado mas NÃO DELETADO: ${pushMongoDBId}`)
+		  	// console.log(`Push enviado mas NÃO DELETADO: ${pushMongoDBId}`)
 		  } else {
-		  	console.log('PUSH ENVIADO E DELETADO COM SUCESSO')
+		  	// console.log('PUSH ENVIADO E DELETADO COM SUCESSO')
 		  }
 		});
-
-
 	});
 
+
+	const scheduledTimeOnTime = getScheduledTimeToPushOnTime(date, time)
+
+	var k = schedule.scheduleJob(scheduledTimeOnTime, function(){
+		firebase.sendPush(firebaseToken, "Começooooou!", `Começou a live com ${name}! Acesse pelo app ;)`)
+
+		PushScheduled.deleteOne({ '_id': pushMongoDBId }, function (err) {
+		  if (err) {
+		  	// console.log(`Push enviado mas NÃO DELETADO: ${pushMongoDBId}`)
+		  } else {
+		  	// console.log('PUSH ENVIADO E DELETADO COM SUCESSO')
+		  }
+		});
+	});
 }
 
 
 function getScheduledTimeToPush(date, time) {
 	const liveDateTime = `${date} ${time}`
-	return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').subtract(15, 'minutes').format('YYYY-MM-DD HH:mm:ss')
+	return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').subtract(30, 'minutes').format('YYYY-MM-DD HH:mm:ss')
+}
+
+function getScheduledTimeToPushOnTime(date, time) {
+	const liveDateTime = `${date} ${time}`
+	return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').format('YYYY-MM-DD HH:mm:ss')
 }
 
 
@@ -440,8 +457,8 @@ router.get('/all', async (req, res) => {
   		}
   	}
 
-	console.log(req.query.findRecord)
-  	console.log(jsonFind)
+	// console.log(req.query.findRecord)
+ //  	console.log(jsonFind)
 
 	Live.find(
 		jsonFind,
