@@ -160,7 +160,9 @@ router.get('/tomorrow', function(req, res) {
 
 router.get('/today', function(req, res) {
 
-	const startToday = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').format()
+	// subtract 3 (GMT) + 5 (limite live)
+	// const startToday = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').format()
+	const startToday = moment().tz("UTC").subtract(8, 'hours').format()
 	const endToday = moment().tz("UTC").subtract(3, 'hours').endOf('day').add(3, 'hours').format()
 	
 	const findRecord = (req.query.findRecord == 'true') || (req.query.findRecord == true)
@@ -405,9 +407,13 @@ router.get('/getSearchData', async (req, res) => {
 
 
 function setLiveIsLiveNow(live) {
-	var diff = live.dateUTC - Date.now()
-	var sixHoursInMillis = 21600000
-  	live.live = diff < 0  && diff > -sixHoursInMillis
+	if(live.isRecorded == true) {
+		live.live = false
+	} else {
+		var diff = live.dateUTC - Date.now()
+		var fiveHoursInMillis = 18000000 
+	  	live.live = diff < 0  && diff > -fiveHoursInMillis	
+	}
 }
 
 
