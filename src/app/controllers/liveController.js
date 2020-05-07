@@ -161,8 +161,8 @@ router.get('/tomorrow', function(req, res) {
 router.get('/today', function(req, res) {
 
 	// subtract 3 (GMT) + 5 (limite live)
-	// const startToday = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').format()
-	const startToday = moment().tz("UTC").subtract(8, 'hours').format()
+	const startToday = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').format()
+	// const startToday = moment().tz("UTC").subtract(8, 'hours').format()
 	const endToday = moment().tz("UTC").subtract(3, 'hours').endOf('day').add(3, 'hours').format()
 	
 	const findRecord = (req.query.findRecord == 'true') || (req.query.findRecord == true)
