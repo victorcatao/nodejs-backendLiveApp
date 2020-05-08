@@ -6,17 +6,20 @@ admin.initializeApp({
   databaseURL: "https://liveapp-275503.firebaseio.com"
 });
 
-const sendPushFunction = function sendPush(token, title, body) {
+const sendPushFunction = function sendPush(token, title, body, url) {
+
+  var data = {}
+
+  if(url != null) {
+    data.url = url
+  }
 
   let message = {
     notification: {
         title: title,
         body: body
     },
-    data: {
-        // isScheduled: "true",
-        // scheduledTime: "2020-04-30 00:40:00"
-    },
+    data: data,
     // Apple specific settings
     apns: {
         headers: {

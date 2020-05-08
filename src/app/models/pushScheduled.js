@@ -6,7 +6,14 @@ const PushScheduledSchema = new mongoose.Schema({
   date: String,
   time: String,
   scheduledTime: String,
-  platform: String
+  platform: String,
+  url: String,
+  title: String,
+  body: String,
+  isLive: {
+    type: Boolean,
+    default: true
+  }
 });
 
 PushScheduledSchema.set('toJSON', {

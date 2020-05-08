@@ -52,6 +52,22 @@ const LiveSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  forcedLive: {
+    type: Boolean,
+    default: false
+  },
+  pushSponsored: {
+    date: String,
+    time: String,
+    title: String,
+    body: String,
+    url: String
+  },
+  hidden: {
+    type: Boolean,
+    default: false,
+    select: false
+  },
   dateUTC: {
     type: Date 
   }

@@ -9,17 +9,21 @@ const schedule = require('node-schedule');
 const mongoose = require('mongoose')
 
 
+firebase.sendPush(
+	"fNopJxfC3kugj1PtnbGBEs:APA91bH20aNyjG3LmPyg9ZUP13yB7JZb4d0rToi1ws7fQWwqBS0Ji0m6mhdYae-A_PtjaNo4a3vdG4G5AJFCngAio5xJcSE1YBxTijBDPZILYLX3L-1iQ14WpACeTIRTENBkegKVV4gu", 
+	"Começooooou!", 
+	`Começou a live com pelo app ;)`, 
+	"https://google.com")
+
 // Isso é pra reprogramar as rotinas que morreram por conta do servidor ter sido restartado
 PushScheduled.find().then(
 	function(docs) {
 		docs.forEach(function(push, index) {
 			// console.log('RECUPERANDO PUSH QUE NAO FOI ENVIADO')
-			schedulePush(push.firebaseToken, push.name, push.date, push.time, push.id)
+			sponsorPush(push)
 		})
 	}
 );
-
-
 
 router.post('/sendSuggestion', function(req, res) {
 
@@ -99,21 +103,44 @@ router.post('/convertEverybody', function(req, res) {
  //    	})
  //  	});
  	
- 	PushScheduled.remove(
- 		{ 
- 			$or: [
- 				{ 'firebaseToken': null }, 
- 				{ 'firebaseToken': ''}
- 			] 
- 		}, 
- 		function(err, docs) {
-	 		if(err) {
-	 			res.send({error: err})
-	 		} else {
-	 			res.send(docs)
-	 		}
- 		}
- 	);
+ 	// PushScheduled.remove(
+ 	// 	{ 
+ 	// 		$or: [
+ 	// 			{ 'firebaseToken': null }, 
+ 	// 			{ 'firebaseToken': ''}
+ 	// 		] 
+ 	// 	}, 
+ 	// 	function(err, docs) {
+	 // 		if(err) {
+	 // 			res.send({error: err})
+	 // 		} else {
+	 // 			res.send(docs)
+	 // 		}
+ 	// 	}
+ 	// );
+
+
+ 	PushScheduled.find().then(function(docs){
+ 		docs.forEach(function(doc, index){
+ 			doc.isLive = true
+ 			doc.title = "Olho na Live!"
+			doc.body = `Daqui a pouco tem live com ${doc.name}! Fique ligado ;)`
+			doc.url = null
+ 			doc.save()
+ 		})
+ 	})
+
+
+
+ 	Live.find().then(function(docs) {
+    	docs.forEach(function(live, index) {
+    		live.hidden = false
+    		live.forcedLive = false
+    		live.save()
+    		// live.isRecorded = false
+    		// live.save()
+    	})
+  	});
 
 });
 
@@ -125,7 +152,8 @@ router.get('/tomorrow', function(req, res) {
 
 	const findRecord = (req.query.findRecord == 'true') || (req.query.findRecord == true)
   	const jsonFind = { 
-  		isRecorded: findRecord
+  		isRecorded: findRecord,
+  		hidden: false
   	}
   	
   	if(findRecord == false) {
@@ -167,7 +195,8 @@ router.get('/today', function(req, res) {
 	
 	const findRecord = (req.query.findRecord == 'true') || (req.query.findRecord == true)
   	const jsonFind = { 
-  		isRecorded: findRecord
+  		isRecorded: findRecord,
+  		hidden: false
   	}
   	
   	if(findRecord == false) {
@@ -206,6 +235,7 @@ router.get('/findByGenre', function(req, res) {
 	const findRecord = (req.query.findRecord == 'true') || (req.query.findRecord == true)
   	const jsonFind = { 
   		isRecorded: findRecord,
+  		hidden: false,
   		genres: {'$regex': genreName, $options:'i'}
   	}
   	
@@ -243,7 +273,10 @@ router.get('/genres', function(req, res) {
 	
 	const startToday = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').format()
 	const findRecord = (req.query.findRecord == 'true') || (req.query.findRecord == true)
-  	const jsonFind = { isRecorded: findRecord }
+  	const jsonFind = { 
+  		isRecorded: findRecord,
+  		hidden: false
+  	}
   	
   	if(findRecord == false) {
   		jsonFind.dateUTC = {
@@ -286,10 +319,42 @@ router.post('/addToCalendar', async (req, res) => {
 	if(firebaseToken == '' || firebaseToken == null || firebaseToken == undefined) {
 		return res.send() // erro de token vazio
 	} 
+	
+	const pushSponsored = req.body.pushSponsored
+
+	if(pushSponsored && pushSponsored.date && pushSponsored.time && pushSponsored.title && pushSponsored.body) {
+		const sponsoredDate = pushSponsored.date
+		const sponsoredTime = pushSponsored.time
+
+		var sponsoredPush = new PushScheduled({
+			firebaseToken: firebaseToken,
+			date: pushSponsored.date,
+			time: pushSponsored.time,
+			title: pushSponsored.title,
+			body: pushSponsored.body,
+			url: pushSponsored.url,
+			scheduledTime: getScheduledTimeToPushOnTime(pushSponsored.date, pushSponsored.time),
+			platform: req.body.platform,
+			isLive: false
+		})
+
+		sponsoredPush.save(
+			function(error, doc) {
+				if(error) {
+					console.log(error)
+				}
+				sponsorPush(doc)
+			}
+		)
+	}
+
 
 	const name = req.body.name
 	const date = req.body.date
 	const time = req.body.time
+
+	var titlePush = !req.body.titlePush ? "Olho na Live!" : req.body.titlePush
+	var bodyPush = !req.body.bodyPush ? `Daqui a pouco tem live com ${name}! Fique ligado ;)` : req.body.bodyPush
 
 	var push = new PushScheduled(
 			{
@@ -297,8 +362,11 @@ router.post('/addToCalendar', async (req, res) => {
 				name: name,
 				date: date,
 			 	time: time,
+			 	title: titlePush,
+			 	body: bodyPush,
 				scheduledTime: getScheduledTimeToPush(date, time),
-				platform: req.body.platform
+				platform: req.body.platform,
+				isLive: true
 			}
 		);
 
@@ -308,54 +376,95 @@ router.post('/addToCalendar', async (req, res) => {
 				console.log(error)
 			}
 			// console.log(doc)
-			schedulePush(firebaseToken, name, date, time, doc.id)
+			// schedulePush(firebaseToken, name, date, time, doc.id)
+			sponsorPush(doc)
 			res.send()
 		}
 	)
 
 });
 
-function schedulePush(firebaseToken, name, date, time, pushMongoDBId){
 
-	const scheduledTime = getScheduledTimeToPush(date, time)
+function sponsorPush(push){
+	console.log(push)
 
-	var j = schedule.scheduleJob(scheduledTime, function(){
-		firebase.sendPush(firebaseToken, "Olho na Live!", `Daqui a pouco tem live com ${name}! Fique ligado ;)`)
+	if(push.isLive == true) {
+		const scheduledTimeOnTime = getScheduledTimeToPushOnTime(push.date, push.time)
+		console.log(scheduledTimeOnTime)
+		var k = schedule.scheduleJob(scheduledTimeOnTime, function(){
+			firebase.sendPush(push.firebaseToken, "Começooooou!", `Começou a live com ${push.name}! Acesse pelo app ;)`, push.url)
 
-		PushScheduled.deleteOne({ '_id': pushMongoDBId }, function (err) {
-		  if (err) {
-		  	// console.log(`Push enviado mas NÃO DELETADO: ${pushMongoDBId}`)
-		  } else {
-		  	// console.log('PUSH ENVIADO E DELETADO COM SUCESSO')
-		  }
-		});
+			PushScheduled.deleteOne({ '_id': push.id }, function (err) {
+			  if (err) {
+			  	console.log(`sponsorPush enviado mas NÃO DELETADO: ${pushMongoDBId}`)
+			  } else {
+			  	console.log('sponsorPush ENVIADO E DELETADO COM SUCESSO')
+			  }
+			});
+
+		})
+	}
+
+	var j = schedule.scheduleJob(push.scheduledTime, function(){
+		console.log('TA NA HORA DE MANDAAAARRR')
+		firebase.sendPush(push.firebaseToken, push.title, push.body, push.url)
+
+		if(push.isLive == false) {
+			PushScheduled.deleteOne({ '_id': push.id }, function (err) {
+			  if (err) {
+			  	console.log(`sponsorPush enviado mas NÃO DELETADO: ${pushMongoDBId}`)
+			  } else {
+			  	console.log('sponsorPush ENVIADO E DELETADO COM SUCESSO')
+			  }
+			});
+		}
 	});
 
-
-	const scheduledTimeOnTime = getScheduledTimeToPushOnTime(date, time)
-
-	var k = schedule.scheduleJob(scheduledTimeOnTime, function(){
-		firebase.sendPush(firebaseToken, "Começooooou!", `Começou a live com ${name}! Acesse pelo app ;)`)
-
-		PushScheduled.deleteOne({ '_id': pushMongoDBId }, function (err) {
-		  if (err) {
-		  	// console.log(`Push enviado mas NÃO DELETADO: ${pushMongoDBId}`)
-		  } else {
-		  	// console.log('PUSH ENVIADO E DELETADO COM SUCESSO')
-		  }
-		});
-	});
 }
+
+// function schedulePush(firebaseToken, name, date, time, pushMongoDBId){
+
+// 	const scheduledTime = getScheduledTimeToPush(date, time)
+
+// 	var j = schedule.scheduleJob(scheduledTime, function(){
+// 		firebase.sendPush(firebaseToken, "Olho na Live!", `Daqui a pouco tem live com ${name}! Fique ligado ;)`)
+
+// 		PushScheduled.deleteOne({ '_id': pushMongoDBId }, function (err) {
+// 		  if (err) {
+// 		  	// console.log(`Push enviado mas NÃO DELETADO: ${pushMongoDBId}`)
+// 		  } else {
+// 		  	// console.log('PUSH ENVIADO E DELETADO COM SUCESSO')
+// 		  }
+// 		});
+// 	});
+
+
+// 	const scheduledTimeOnTime = getScheduledTimeToPushOnTime(date, time)
+
+// 	var k = schedule.scheduleJob(scheduledTimeOnTime, function(){
+// 		firebase.sendPush(firebaseToken, "Começooooou!", `Começou a live com ${name}! Acesse pelo app ;)`)
+
+// 		PushScheduled.deleteOne({ '_id': pushMongoDBId }, function (err) {
+// 		  if (err) {
+// 		  	// console.log(`Push enviado mas NÃO DELETADO: ${pushMongoDBId}`)
+// 		  } else {
+// 		  	// console.log('PUSH ENVIADO E DELETADO COM SUCESSO')
+// 		  }
+// 		});
+// 	});
+// }
 
 
 function getScheduledTimeToPush(date, time) {
 	const liveDateTime = `${date} ${time}`
 	return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').subtract(30, 'minutes').format('YYYY-MM-DD HH:mm:ss')
+	// return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").subtract(3, 'hours').subtract(2, 'minutes').format('YYYY-MM-DD HH:mm:ss')
 }
 
 function getScheduledTimeToPushOnTime(date, time) {
 	const liveDateTime = `${date} ${time}`
 	return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').format('YYYY-MM-DD HH:mm:ss')
+	// return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").subtract(3, 'hours').format('YYYY-MM-DD HH:mm:ss')
 }
 
 
@@ -369,7 +478,9 @@ function getScheduledTimeToPushOnTime(date, time) {
 router.get('/getSearchData', async (req, res) => {
 
 	Live.find(
-		{},
+		{
+			hidden: false
+		},
   		[],
   		{
 			sort: {
@@ -407,12 +518,17 @@ router.get('/getSearchData', async (req, res) => {
 
 
 function setLiveIsLiveNow(live) {
+	if(live.forcedLive == true) {
+		live.live = true
+		return
+	}
+
 	if(live.isRecorded == true) {
 		live.live = false
 	} else {
 		var diff = live.dateUTC - Date.now()
-		var fiveHoursInMillis = 18000000 
-	  	live.live = diff < 0  && diff > -fiveHoursInMillis	
+		var threeAndAHalfHoursInMillis = 12600000
+	  	live.live = diff < 0  && diff > -threeAndAHalfHoursInMillis	
 	}
 }
 
@@ -426,6 +542,8 @@ router.post('/updateMyLives', async (req, res) => {
     req.body.ids.forEach(function(id, index){
     	ids.push(mongoose.Types.ObjectId(id))
     })
+
+    // verificar se eh vazio e mandar de volta
 
     const startToday = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').format()
 
@@ -455,7 +573,10 @@ router.get('/all', async (req, res) => {
   	const startToday = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').format()
   	
   	const findRecord = (req.query.findRecord == 'true') || (req.query.findRecord == true)
-  	const jsonFind = { isRecorded: findRecord }
+  	const jsonFind = { 
+  		isRecorded: findRecord,
+  		hidden: false
+  	}
 
   	if(findRecord == false) {
   		jsonFind.dateUTC = {
@@ -512,7 +633,7 @@ router.get('/getAllLives', async (req, res) => {
 
   	
 	Live.find(
-		{},
+		{hidden: false},
   		[],
   		{
 			sort: {
