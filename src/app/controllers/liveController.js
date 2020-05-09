@@ -9,11 +9,11 @@ const schedule = require('node-schedule');
 const mongoose = require('mongoose')
 
 
-firebase.sendPush(
-	"fNopJxfC3kugj1PtnbGBEs:APA91bH20aNyjG3LmPyg9ZUP13yB7JZb4d0rToi1ws7fQWwqBS0Ji0m6mhdYae-A_PtjaNo4a3vdG4G5AJFCngAio5xJcSE1YBxTijBDPZILYLX3L-1iQ14WpACeTIRTENBkegKVV4gu", 
-	"Começooooou!", 
-	`Começou a live com pelo app ;)`, 
-	"https://google.com")
+// firebase.sendPush(
+// 	"fNopJxfC3kugj1PtnbGBEs:APA91bH20aNyjG3LmPyg9ZUP13yB7JZb4d0rToi1ws7fQWwqBS0Ji0m6mhdYae-A_PtjaNo4a3vdG4G5AJFCngAio5xJcSE1YBxTijBDPZILYLX3L-1iQ14WpACeTIRTENBkegKVV4gu", 
+// 	"Começooooou!", 
+// 	`Começou a live com pelo app ;)`, 
+// 	"https://google.com")
 
 // Isso é pra reprogramar as rotinas que morreram por conta do servidor ter sido restartado
 PushScheduled.find().then(
