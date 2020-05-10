@@ -119,6 +119,7 @@ router.post('/create', function(req, res) {
 			// PUSH QUANDO A LIVE COMECAR
 			var titleStart = "Começooooou!"
 			var bodyStart = `Começou a live com ${req.body.name}! Acesse pelo app ;)`
+			var urlStart = req.body.url[0]
 
 			if(req.body.push.title) {
 				titleStart = req.body.push.title
@@ -128,12 +129,16 @@ router.post('/create', function(req, res) {
 				bodyStart = req.body.push.body
 			}
 
+			if(req.body.push.url) {
+				urlStart = req.body.push.url
+			}
+
 			var pushStart = new Push(
 				{
 					liveId: live.id,
 				  	title: titleStart,
 				  	body: bodyStart,
-				  	url: req.body.url[0],
+				  	url: urlStart,
 				  	scheduledTime: getScheduledTimeToPushOnTime(req.body.date, req.body.time),
 				  	isWarning: false,
 				  	isLive: true
@@ -144,9 +149,14 @@ router.post('/create', function(req, res) {
 				schedulePush(pushStart)
 			})
 
+
+
+
+
 			// PUSH DE AVISO ANTES DA LIVE COMECAR
 			var titleBefore = 'Olha na live!'
 			var bodyBefore = `Daqui a pouco tem live com ${req.body.name}! Fique ligado ;)`
+			var urlBefore = req.body.url[0]
 
 			if(req.body.push.pushBefore.title){
 				titleBefore = req.body.push.pushBefore.title
@@ -156,12 +166,16 @@ router.post('/create', function(req, res) {
 				bodyBefore = req.body.push.pushBefore.body
 			}
 
+			if(req.body.push.pushBefore.url) {
+				urlBefore = req.body.push.url
+			}
+
 			var pushBefore = new Push(
 				{
 					liveId: live.id,
 				  	title: titleBefore,
 				  	body: bodyBefore,
-				  	url: req.body.url[0],
+				  	url: urlBefore,
 				  	scheduledTime: getScheduledTimeToPush(req.body.date, req.body.time),
 				  	isWarning: true,
 				  	isLive: true
