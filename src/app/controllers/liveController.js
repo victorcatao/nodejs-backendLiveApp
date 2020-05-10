@@ -9,6 +9,8 @@ const PushScheduled = require('../models/pushScheduled')
 const schedule = require('node-schedule');
 const mongoose = require('mongoose')
 
+const liveEstimatedTime = 12600000 // 3h 30m
+
 // firebase.sendPush(
 // 	"fNopJxfC3kugj1PtnbGBEs:APA91bH20aNyjG3LmPyg9ZUP13yB7JZb4d0rToi1ws7fQWwqBS0Ji0m6mhdYae-A_PtjaNo4a3vdG4G5AJFCngAio5xJcSE1YBxTijBDPZILYLX3L-1iQ14WpACeTIRTENBkegKVV4gu", 
 // 	"Começooooou!", 
@@ -352,7 +354,7 @@ router.get('/today', function(req, res) {
 			docs.forEach(function(live, index){
   				setLiveIsLiveNow(live)
   			})
-			return res.send(docs)
+			return res.send(removeFinishedLivesForToday(docs))
 		}
 	);
 });
@@ -393,7 +395,7 @@ router.get('/findByGenre', function(req, res) {
 			docs.forEach(function(live, index){
   				setLiveIsLiveNow(live)
   			})
-			return res.send(docs)
+			return res.send(removeFinishedLivesForToday(docs))
 		}
 	);
 });
@@ -693,12 +695,24 @@ function setLiveIsLiveNow(live) {
 		live.live = false
 	} else {
 		var diff = live.dateUTC - Date.now()
-		var threeAndAHalfHoursInMillis = 12600000
-	  	live.live = diff < 0  && diff > -threeAndAHalfHoursInMillis	
+		var liveEstimatedTime = 12600000
+	  	live.live = diff < 0  && diff > -liveEstimatedTime	
 	}
 }
 
-
+function removeFinishedLivesForToday(lives) {
+	var filteredResult = []
+	lives.forEach(function(live, index){
+		const diff = Date.now() - live.dateUTC
+		if(diff > liveEstimatedTime) {
+			// NAO DEVE APARECER PQ JA PASSOU DAS HORAS DELE
+		} else {
+			filteredResult.push(live)
+		}	
+	})
+	
+	return filteredResult
+}
 
 
 
@@ -724,7 +738,7 @@ router.post('/updateMyLives', async (req, res) => {
   			docs.forEach(function(live, index){
   				setLiveIsLiveNow(live)
   			})
-    		res.send(docs)
+    		res.send(removeFinishedLivesForToday(docs))
   		});
 
 });
@@ -765,7 +779,7 @@ router.get('/all', async (req, res) => {
   			docs.forEach(function(live, index){
   				setLiveIsLiveNow(live)
   			})
-    		res.send(docs)
+    		res.send(removeFinishedLivesForToday(docs))
   		});
 
 });
