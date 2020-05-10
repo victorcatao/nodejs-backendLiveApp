@@ -595,14 +595,14 @@ function sponsorPush(push){
 
 function getScheduledTimeToPush(date, time) {
 	const liveDateTime = `${date} ${time}`
-	// return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').subtract(30, 'minutes').format('YYYY-MM-DD HH:mm:ss')
-	return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").subtract(3, 'hours').subtract(2, 'minutes').format('YYYY-MM-DD HH:mm:ss')
+	return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').subtract(30, 'minutes').format('YYYY-MM-DD HH:mm:ss')
+	// return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").subtract(3, 'hours').subtract(2, 'minutes').format('YYYY-MM-DD HH:mm:ss')
 }
 
 function getScheduledTimeToPushOnTime(date, time) {
 	const liveDateTime = `${date} ${time}`
-	// return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').format('YYYY-MM-DD HH:mm:ss')
-	return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").subtract(3, 'hours').format('YYYY-MM-DD HH:mm:ss')
+	return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').format('YYYY-MM-DD HH:mm:ss')
+	// return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").subtract(3, 'hours').format('YYYY-MM-DD HH:mm:ss')
 }
 
 
