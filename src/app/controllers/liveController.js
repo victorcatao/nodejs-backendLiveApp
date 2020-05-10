@@ -704,7 +704,7 @@ function removeFinishedLivesForToday(lives) {
 	var filteredResult = []
 	lives.forEach(function(live, index){
 		const diff = Date.now() - live.dateUTC
-		if(diff > liveEstimatedTime) {
+		if(diff > liveEstimatedTime && live.forcedLive == false) {
 			// NAO DEVE APARECER PQ JA PASSOU DAS HORAS DELE
 		} else {
 			filteredResult.push(live)
