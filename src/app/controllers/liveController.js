@@ -18,9 +18,23 @@ const mongoose = require('mongoose')
 // Isso é pra reprogramar as rotinas que morreram por conta do servidor ter sido restartado
 PushScheduled.find().then(
 	function(docs) {
+		var shouldScheduleIds = []
+		var arr = []
 		docs.forEach(function(push, index) {
-			// console.log('RECUPERANDO PUSH QUE NAO FOI ENVIADO')
-			sponsorPush(push)
+			let key = push.firebaseToken + push.body
+			if(arr.includes(key)) {
+				// deleta
+				PushScheduled.remove({'_id': push.id}, function(err){})
+			} else {
+				arr.push(key)
+				shouldScheduleIds.push(push.id)
+			}
+		})
+
+		docs.forEach(function(push, index) {
+			if(shouldScheduleIds.includes(push.id)) {
+				sponsorPush(push)	
+			}
 		})
 	}
 );
