@@ -3,11 +3,11 @@ const moment = require('moment')
 const router = express.Router();
 const firebase = require('../helpers/firebase')
 const Live = require('../models/live');
+const Push = require('../models/push');
 const Suggestion = require('../models/suggestion')
 const PushScheduled = require('../models/pushScheduled')
 const schedule = require('node-schedule');
 const mongoose = require('mongoose')
-
 
 // firebase.sendPush(
 // 	"fNopJxfC3kugj1PtnbGBEs:APA91bH20aNyjG3LmPyg9ZUP13yB7JZb4d0rToi1ws7fQWwqBS0Ji0m6mhdYae-A_PtjaNo4a3vdG4G5AJFCngAio5xJcSE1YBxTijBDPZILYLX3L-1iQ14WpACeTIRTENBkegKVV4gu", 
@@ -24,6 +24,19 @@ PushScheduled.find().then(
 		})
 	}
 );
+
+
+
+
+Push.find().then(
+	function(docs){
+		docs.forEach(function(push, index) {
+			console.log('RECUPERANDO PUSH V2 QUE NAO FOI ENVIADO')
+			schedulePush(push)
+		})
+	}
+)
+
 
 router.post('/sendSuggestion', function(req, res) {
 
@@ -51,17 +64,17 @@ router.post('/sendSuggestion', function(req, res) {
 
 router.post('/createMinduca', function(req, res) {
 
-	req.body.forEach(function(live, index){
-		req.body[index].dateUTC = moment(`${req.body[index].date} ${req.body[index].time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours')
-	})
+	// req.body.forEach(function(live, index){
+	// 	req.body[index].dateUTC = moment(`${req.body[index].date} ${req.body[index].time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours')
+	// })
 
-	Live.insertMany(req.body)
-	    .then(function (docs) {
-	        res.json(docs);
-	    })
-	    .catch(function (err) {
+	// Live.insertMany(req.body)
+	//     .then(function (docs) {
+	//         res.json(docs);
+	//     })
+	//     .catch(function (err) {
 	        res.status(500).send(err);
-	    });
+	//     });
 });
 
 
@@ -87,6 +100,84 @@ router.post('/create', function(req, res) {
 			res.status(400).send({'errorMessage': error.message});
 			return
 		} else {
+
+
+			// PUSH QUANDO A LIVE COMECAR
+			var titleStart = "Começooooou!"
+			var bodyStart = `Começou a live com ${req.body.name}! Acesse pelo app ;)`
+
+			if(req.body.push.title) {
+				titleStart = req.body.push.title
+			}
+
+			if(req.body.push.body) {
+				bodyStart = req.body.push.body
+			}
+
+			var pushStart = new Push(
+				{
+					liveId: live.id,
+				  	title: titleStart,
+				  	body: bodyStart,
+				  	url: req.body.url[0],
+				  	scheduledTime: getScheduledTimeToPushOnTime(req.body.date, req.body.time),
+				  	isWarning: false,
+				  	isLive: true
+				}
+			)
+
+			pushStart.save(function(error){
+				schedulePush(pushStart)
+			})
+
+			// PUSH DE AVISO ANTES DA LIVE COMECAR
+			var titleBefore = 'Olha na live!'
+			var bodyBefore = `Daqui a pouco tem live com ${req.body.name}! Fique ligado ;)`
+
+			if(req.body.push.pushBefore.title){
+				titleBefore = req.body.push.pushBefore.title
+			}
+
+			if(req.body.push.pushBefore.body){
+				bodyBefore = req.body.push.pushBefore.body
+			}
+
+			var pushBefore = new Push(
+				{
+					liveId: live.id,
+				  	title: titleBefore,
+				  	body: bodyBefore,
+				  	url: req.body.url[0],
+				  	scheduledTime: getScheduledTimeToPush(req.body.date, req.body.time),
+				  	isWarning: true,
+				  	isLive: true
+				}
+			)
+
+			pushBefore.save(function(error){
+				schedulePush(pushBefore)
+			})
+
+			if(req.body.push.pushSponsored && req.body.push.pushSponsored.date && req.body.push.pushSponsored.time && req.body.push.pushSponsored.title && req.body.push.pushSponsored.body) {
+				var pushSponsored = new Push(
+					{
+						liveId: live.id,
+					  	title: req.body.push.pushSponsored.title,
+					  	body: req.body.push.pushSponsored.body,
+					  	url: req.body.push.pushSponsored.url,
+					  	scheduledTime: getScheduledTimeToPushOnTime(req.body.push.pushSponsored.date, req.body.push.pushSponsored.time),
+					  	isWarning: false,
+					  	isSponsored: true,
+					  	isLive: true
+					}
+				)
+
+				pushSponsored.save(function(error) {
+					schedulePush(pushSponsored)
+				})
+				
+			}
+
 			res.send(live)
 		}
 	})
@@ -94,14 +185,49 @@ router.post('/create', function(req, res) {
 
 
 router.post('/convertEverybody', function(req, res) {
-	// Live.find().then(function(docs) {
- //    	docs.forEach(function(live, index) {
- //    		// live.dateUTC = moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format()
- //    		// live.save()
- //    		// live.isRecorded = false
- //    		// live.save()
- //    	})
- //  	});
+	Live.find().then(function(docs) {
+    	docs.forEach(function(live, index) {
+    		// PUSH QUANDO A LIVE COMECAR
+			var titleStart = "Começooooou!"
+			var bodyStart = `Começou a live com ${live.name}! Acesse pelo app ;)`
+
+			var pushStart = new Push(
+				{
+					liveId: live.id,
+				  	title: titleStart,
+				  	body: bodyStart,
+				  	url: live.url[0],
+				  	scheduledTime: getScheduledTimeToPushOnTime(live.date, live.time),
+				  	isWarning: false,
+				  	isLive: true
+				}
+			)
+
+			pushStart.save(function(error){
+				schedulePush(pushStart)
+			})
+
+			// PUSH DE AVISO ANTES DA LIVE COMECAR
+			var titleBefore = 'Olha na live!'
+			var bodyBefore = `Daqui a pouco tem live com ${live.name}! Fique ligado ;)`
+
+			var pushBefore = new Push(
+				{
+					liveId: live.id,
+				  	title: titleBefore,
+				  	body: bodyBefore,
+				  	url: live.url[0],
+				  	scheduledTime: getScheduledTimeToPush(live.date, live.time),
+				  	isWarning: true,
+				  	isLive: true
+				}
+			)
+
+			pushBefore.save(function(error){
+				schedulePush(pushBefore)
+			})
+    	})
+  	});
  	
  	// PushScheduled.remove(
  	// 	{ 
@@ -118,29 +244,6 @@ router.post('/convertEverybody', function(req, res) {
 	 // 		}
  	// 	}
  	// );
-
-
- 	PushScheduled.find().then(function(docs){
- 		docs.forEach(function(doc, index){
- 			doc.isLive = true
- 			doc.title = "Olho na Live!"
-			doc.body = `Daqui a pouco tem live com ${doc.name}! Fique ligado ;)`
-			doc.url = null
- 			doc.save()
- 		})
- 	})
-
-
-
- 	Live.find().then(function(docs) {
-    	docs.forEach(function(live, index) {
-    		live.hidden = false
-    		live.forcedLive = false
-    		live.save()
-    		// live.isRecorded = false
-    		// live.save()
-    	})
-  	});
 
 });
 
@@ -306,12 +409,21 @@ router.get('/genres', function(req, res) {
 
 
 
+router.post('/deletePushes', async (req, res) => {
+	res.send()
+	if(req.body.firebaseToken){
+		let firebaseToken = req.body.firebaseToken
+		PushScheduled.remove({ firebaseToken: firebaseToken }, function(error){
+			if(error){
+				console.log('not removed: ' + error)
+			}
+			console.log('removed everybody')
+		})	
+	}	
+})
 
 
-
-
-
-
+// DEPRECATED
 router.post('/addToCalendar', async (req, res) => {
 
 	const firebaseToken = req.body.firebaseToken
@@ -383,6 +495,32 @@ router.post('/addToCalendar', async (req, res) => {
 	)
 
 });
+
+
+
+function schedulePush(push) {
+	console.log('schedulePush: Vai programar o Push:\n' + push.body)
+	var k = schedule.scheduleJob(push.scheduledTime, function(){
+				sendPush(push)
+			})
+}
+
+function sendPush(push) {
+	console.log('sendPush: Vai ENVIAR o Push: ' + push.body)
+	firebase.sendPushV2(push)
+
+	Push.deleteOne({ '_id': push.id }, function(err){
+		if(err) {
+			console.log(err)
+		}
+		console.log('APAGOU O PUSH')
+	})
+}
+
+
+
+
+
 
 
 function sponsorPush(push){
@@ -457,14 +595,14 @@ function sponsorPush(push){
 
 function getScheduledTimeToPush(date, time) {
 	const liveDateTime = `${date} ${time}`
-	return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').subtract(30, 'minutes').format('YYYY-MM-DD HH:mm:ss')
-	// return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").subtract(3, 'hours').subtract(2, 'minutes').format('YYYY-MM-DD HH:mm:ss')
+	// return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').subtract(30, 'minutes').format('YYYY-MM-DD HH:mm:ss')
+	return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").subtract(3, 'hours').subtract(2, 'minutes').format('YYYY-MM-DD HH:mm:ss')
 }
 
 function getScheduledTimeToPushOnTime(date, time) {
 	const liveDateTime = `${date} ${time}`
-	return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').format('YYYY-MM-DD HH:mm:ss')
-	// return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").subtract(3, 'hours').format('YYYY-MM-DD HH:mm:ss')
+	// return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').format('YYYY-MM-DD HH:mm:ss')
+	return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").subtract(3, 'hours').format('YYYY-MM-DD HH:mm:ss')
 }
 
 

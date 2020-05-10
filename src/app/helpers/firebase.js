@@ -55,6 +55,58 @@ const sendPushFunction = function sendPush(token, title, body, url) {
 
 }
 
+
+const sendPushV2Function = function sendPushV2(push) {
+
+  var data = {}
+
+  if(push.url) {
+    data.url = push.url
+  }
+
+  let message = {
+    topic: `/topics/${push.liveId}`,
+    notification: {
+        title: push.title,
+        body: push.body
+    },
+    data: data,
+    // Apple specific settings
+    apns: {
+        headers: {
+            'apns-priority': '10',
+        },
+        payload: {
+            aps: {
+                sound: 'default',
+            }
+        },
+    },
+    android: {
+      priority: 'high',
+      notification: {
+          sound: 'default',
+      }
+    }
+  };
+
+  console.log('VAI ENVIAR O PAYLOAD ABAIXO')
+  console.log(message)
+
+
+  admin.messaging().send(message)
+    .then((response) => {
+      // Response is a message ID string.
+      console.log('Successfully sent message:', response);
+    })
+    .catch((error) => {
+      console.log('Error sending message:', error);
+    });
+
+}
+
+
 module.exports = {
-  sendPush: sendPushFunction
+  sendPush: sendPushFunction,
+  sendPushV2: sendPushV2Function
 }
