@@ -730,17 +730,18 @@ function setLiveIsLiveNow(live) {
 }
 
 function removeFinishedLivesForToday(lives) {
-	var filteredResult = []
-	lives.forEach(function(live, index){
-		const diff = Date.now() - live.dateUTC
-		if(diff > liveEstimatedTime && live.forcedLive == false) {
-			// NAO DEVE APARECER PQ JA PASSOU DAS HORAS DELE
-		} else {
-			filteredResult.push(live)
-		}	
-	})
+	return lives
+	// var filteredResult = []
+	// lives.forEach(function(live, index){
+	// 	const diff = Date.now() - live.dateUTC
+	// 	if(diff > liveEstimatedTime && live.forcedLive == false) {
+	// 		// NAO DEVE APARECER PQ JA PASSOU DAS HORAS DELE
+	// 	} else {
+	// 		filteredResult.push(live)
+	// 	}	
+	// })
 	
-	return filteredResult
+	// return filteredResult
 }
 
 
