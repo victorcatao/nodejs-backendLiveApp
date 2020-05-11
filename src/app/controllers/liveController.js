@@ -139,15 +139,15 @@ function createPushesForNewLive(body, live) {
 	var bodyStart = `Começou a live com ${body.name}! Acesse pelo app ;)`
 	var urlStart = body.url[0]
 
-	if(body.push.title) {
+	if(body.push && body.push.title) {
 		titleStart = body.push.title
 	}
 
-	if(body.push.body) {
+	if(body.push && body.push.body) {
 		bodyStart = body.push.body
 	}
 
-	if(body.push.url) {
+	if(body.push && body.push.url) {
 		urlStart = body.push.url
 	}
 
@@ -176,15 +176,15 @@ function createPushesForNewLive(body, live) {
 	var bodyBefore = `Daqui a pouco tem live com ${body.name}! Fique ligado ;)`
 	var urlBefore = body.url[0]
 
-	if(body.push.pushBefore.title){
+	if(body.push && body.push.pushBefore.title){
 		titleBefore = body.push.pushBefore.title
 	}
 
-	if(body.push.pushBefore.body){
+	if(body.push && body.push.pushBefore.body){
 		bodyBefore = body.push.pushBefore.body
 	}
 
-	if(body.push.pushBefore.url) {
+	if(body.push && body.push.pushBefore.url) {
 		urlBefore = body.push.url
 	}
 
@@ -204,7 +204,7 @@ function createPushesForNewLive(body, live) {
 		schedulePush(pushBefore)
 	})
 
-	if(body.push.pushSponsored && body.push.pushSponsored.date && body.push.pushSponsored.time && body.push.pushSponsored.title && body.push.pushSponsored.body) {
+	if(body.push && body.push.pushSponsored && body.push.pushSponsored.date && body.push.pushSponsored.time && body.push.pushSponsored.title && body.push.pushSponsored.body) {
 		var pushSponsored = new Push(
 			{
 				liveId: live.id,
