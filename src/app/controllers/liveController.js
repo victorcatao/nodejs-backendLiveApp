@@ -3,19 +3,24 @@ const moment = require('moment')
 const router = express.Router();
 const firebase = require('../helpers/firebase')
 const Live = require('../models/live');
+const Push = require('../models/push');
 const Suggestion = require('../models/suggestion')
 const PushScheduled = require('../models/pushScheduled')
 const schedule = require('node-schedule');
 const mongoose = require('mongoose')
 
+const liveEstimatedTime = 12600000 // 3h 30m
 
-firebase.sendPush(
-	"fNopJxfC3kugj1PtnbGBEs:APA91bH20aNyjG3LmPyg9ZUP13yB7JZb4d0rToi1ws7fQWwqBS0Ji0m6mhdYae-A_PtjaNo4a3vdG4G5AJFCngAio5xJcSE1YBxTijBDPZILYLX3L-1iQ14WpACeTIRTENBkegKVV4gu", 
-	"Começooooou!", 
-	`Começou a live com pelo app ;)`, 
-	"https://google.com")
+// firebase.sendPush(
+// 	"fNopJxfC3kugj1PtnbGBEs:APA91bH20aNyjG3LmPyg9ZUP13yB7JZb4d0rToi1ws7fQWwqBS0Ji0m6mhdYae-A_PtjaNo4a3vdG4G5AJFCngAio5xJcSE1YBxTijBDPZILYLX3L-1iQ14WpACeTIRTENBkegKVV4gu", 
+// 	"Começooooou!", 
+// 	`Começou a live com pelo app ;)`, 
+// 	"https://google.com")
 
+
+// FORMATO DE PUSH ANTIGO
 // Isso é pra reprogramar as rotinas que morreram por conta do servidor ter sido restartado
+
 PushScheduled.find().then(
 	function(docs) {
 		var shouldScheduleIds = []
@@ -23,7 +28,7 @@ PushScheduled.find().then(
 		docs.forEach(function(push, index) {
 			let key = push.firebaseToken + push.body
 			if(arr.includes(key)) {
-				// deleta
+				// deleta o push pq tá duplicado
 				PushScheduled.remove({'_id': push.id}, function(err){})
 			} else {
 				arr.push(key)
@@ -38,6 +43,23 @@ PushScheduled.find().then(
 		})
 	}
 );
+
+
+
+
+
+startAllPushes()
+function startAllPushes() {
+	Push.find().then(
+		function(docs){
+			docs.forEach(function(push, index) {
+				console.log('RECUPERANDO PUSH V2 QUE NAO FOI ENVIADO')
+				schedulePush(push)
+			})
+		}
+	)
+}
+
 
 router.post('/sendSuggestion', function(req, res) {
 
@@ -71,6 +93,9 @@ router.post('/createMinduca', function(req, res) {
 
 	Live.insertMany(req.body)
 	    .then(function (docs) {
+	    	docs.forEach(function(docs, index){
+	    		createPushesForNewLive(req.body[index], docs[index])
+	    	})
 	        res.json(docs);
 	    })
 	    .catch(function (err) {
@@ -101,21 +126,150 @@ router.post('/create', function(req, res) {
 			res.status(400).send({'errorMessage': error.message});
 			return
 		} else {
+			createPushesForNewLive(req.body, live)
 			res.send(live)
 		}
 	})
 });
 
 
+function createPushesForNewLive(body, live) {
+	// PUSH QUANDO A LIVE COMECAR
+	var titleStart = "Começooooou!"
+	var bodyStart = `Começou a live com ${body.name}! Acesse pelo app ;)`
+	var urlStart = body.url[0]
+
+	if(body.push.title) {
+		titleStart = body.push.title
+	}
+
+	if(body.push.body) {
+		bodyStart = body.push.body
+	}
+
+	if(body.push.url) {
+		urlStart = body.push.url
+	}
+
+	var pushStart = new Push(
+		{
+			liveId: live.id,
+		  	title: titleStart,
+		  	body: bodyStart,
+		  	url: urlStart,
+		  	scheduledTime: getScheduledTimeToPushOnTime(body.date, body.time),
+		  	isWarning: false,
+		  	isLive: true
+		}
+	)
+
+	pushStart.save(function(error){
+		schedulePush(pushStart)
+	})
+
+
+
+
+
+	// PUSH DE AVISO ANTES DA LIVE COMECAR
+	var titleBefore = 'Olha na live!'
+	var bodyBefore = `Daqui a pouco tem live com ${body.name}! Fique ligado ;)`
+	var urlBefore = body.url[0]
+
+	if(body.push.pushBefore.title){
+		titleBefore = body.push.pushBefore.title
+	}
+
+	if(body.push.pushBefore.body){
+		bodyBefore = body.push.pushBefore.body
+	}
+
+	if(body.push.pushBefore.url) {
+		urlBefore = body.push.url
+	}
+
+	var pushBefore = new Push(
+		{
+			liveId: live.id,
+		  	title: titleBefore,
+		  	body: bodyBefore,
+		  	url: urlBefore,
+		  	scheduledTime: getScheduledTimeToPush(body.date, body.time),
+		  	isWarning: true,
+		  	isLive: true
+		}
+	)
+
+	pushBefore.save(function(error){
+		schedulePush(pushBefore)
+	})
+
+	if(body.push.pushSponsored && body.push.pushSponsored.date && body.push.pushSponsored.time && body.push.pushSponsored.title && body.push.pushSponsored.body) {
+		var pushSponsored = new Push(
+			{
+				liveId: live.id,
+			  	title: body.push.pushSponsored.title,
+			  	body: body.push.pushSponsored.body,
+			  	url: body.push.pushSponsored.url,
+			  	scheduledTime: getScheduledTimeToPushOnTime(body.push.pushSponsored.date, body.push.pushSponsored.time),
+			  	isWarning: false,
+			  	isSponsored: true,
+			  	isLive: true
+			}
+		)
+
+		pushSponsored.save(function(error) {
+			schedulePush(pushSponsored)
+		})
+		
+	}
+}
+
+
 router.post('/convertEverybody', function(req, res) {
-	// Live.find().then(function(docs) {
- //    	docs.forEach(function(live, index) {
- //    		// live.dateUTC = moment(`${live.date} ${live.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours').format()
- //    		// live.save()
- //    		// live.isRecorded = false
- //    		// live.save()
- //    	})
- //  	});
+	Live.find().then(function(docs) {
+    	docs.forEach(function(live, index) {
+    		// PUSH QUANDO A LIVE COMECAR
+			var titleStart = "Começooooou!"
+			var bodyStart = `Começou a live com ${live.name}! Acesse pelo app ;)`
+
+			var pushStart = new Push(
+				{
+					liveId: live.id,
+				  	title: titleStart,
+				  	body: bodyStart,
+				  	url: live.url[0],
+				  	scheduledTime: getScheduledTimeToPushOnTime(live.date, live.time),
+				  	isWarning: false,
+				  	isLive: true
+				}
+			)
+
+			pushStart.save(function(error){
+				schedulePush(pushStart)
+			})
+
+			// PUSH DE AVISO ANTES DA LIVE COMECAR
+			var titleBefore = 'Olha na live!'
+			var bodyBefore = `Daqui a pouco tem live com ${live.name}! Fique ligado ;)`
+
+			var pushBefore = new Push(
+				{
+					liveId: live.id,
+				  	title: titleBefore,
+				  	body: bodyBefore,
+				  	url: live.url[0],
+				  	scheduledTime: getScheduledTimeToPush(live.date, live.time),
+				  	isWarning: true,
+				  	isLive: true
+				}
+			)
+
+			pushBefore.save(function(error){
+				schedulePush(pushBefore)
+			})
+    	})
+  	});
  	
  	// PushScheduled.remove(
  	// 	{ 
@@ -132,29 +286,6 @@ router.post('/convertEverybody', function(req, res) {
 	 // 		}
  	// 	}
  	// );
-
-
- 	PushScheduled.find().then(function(docs){
- 		docs.forEach(function(doc, index){
- 			doc.isLive = true
- 			doc.title = "Olho na Live!"
-			doc.body = `Daqui a pouco tem live com ${doc.name}! Fique ligado ;)`
-			doc.url = null
- 			doc.save()
- 		})
- 	})
-
-
-
- 	Live.find().then(function(docs) {
-    	docs.forEach(function(live, index) {
-    		live.hidden = false
-    		live.forcedLive = false
-    		live.save()
-    		// live.isRecorded = false
-    		// live.save()
-    	})
-  	});
 
 });
 
@@ -235,7 +366,7 @@ router.get('/today', function(req, res) {
 			docs.forEach(function(live, index){
   				setLiveIsLiveNow(live)
   			})
-			return res.send(docs)
+			return res.send(removeFinishedLivesForToday(docs))
 		}
 	);
 });
@@ -276,7 +407,12 @@ router.get('/findByGenre', function(req, res) {
 			docs.forEach(function(live, index){
   				setLiveIsLiveNow(live)
   			})
-			return res.send(docs)
+
+  			if(findRecord == true){
+				return res.send(docs)
+  			} else {
+  				return res.send(removeFinishedLivesForToday(docs))
+  			}
 		}
 	);
 });
@@ -320,12 +456,33 @@ router.get('/genres', function(req, res) {
 
 
 
+router.post('/deletePushes', async (req, res) => {
+	res.send()
+	if(req.body.firebaseToken){
+		let firebaseToken = req.body.firebaseToken
+		PushScheduled.remove({ firebaseToken: firebaseToken }, function(error){
+			if(error){
+				console.log('not removed: ' + error)
+			}
+			console.log('removed everybody')
+		})	
+	}	
+})
+
+router.post('/restartPushes', async (req, res) => {
+	Push.find().then(function(docs){
+		docs.forEach(function(push, index){
+			schedule.scheduledJobs[push.id].cancel()
+		})
+
+		startAllPushes()
+
+	})
+	res.send()
+})
 
 
-
-
-
-
+// DEPRECATED
 router.post('/addToCalendar', async (req, res) => {
 
 	const firebaseToken = req.body.firebaseToken
@@ -397,6 +554,32 @@ router.post('/addToCalendar', async (req, res) => {
 	)
 
 });
+
+
+
+function schedulePush(push) {
+	console.log('schedulePush: Vai programar o Push:\n' + push.body)
+	var k = schedule.scheduleJob(push.id, push.scheduledTime, function(){
+				sendPush(push)
+			})
+}
+
+function sendPush(push) {
+	console.log('sendPush: Vai ENVIAR o Push: ' + push.body)
+	firebase.sendPushV2(push)
+
+	Push.deleteOne({ '_id': push.id }, function(err){
+		if(err) {
+			console.log(err)
+		}
+		console.log('APAGOU O PUSH')
+	})
+}
+
+
+
+
+
 
 
 function sponsorPush(push){
@@ -541,12 +724,24 @@ function setLiveIsLiveNow(live) {
 		live.live = false
 	} else {
 		var diff = live.dateUTC - Date.now()
-		var threeAndAHalfHoursInMillis = 12600000
-	  	live.live = diff < 0  && diff > -threeAndAHalfHoursInMillis	
+		var liveEstimatedTime = 12600000
+	  	live.live = diff < 0  && diff > -liveEstimatedTime	
 	}
 }
 
-
+function removeFinishedLivesForToday(lives) {
+	var filteredResult = []
+	lives.forEach(function(live, index){
+		const diff = Date.now() - live.dateUTC
+		if(diff > liveEstimatedTime && live.forcedLive == false) {
+			// NAO DEVE APARECER PQ JA PASSOU DAS HORAS DELE
+		} else {
+			filteredResult.push(live)
+		}	
+	})
+	
+	return filteredResult
+}
 
 
 
@@ -572,7 +767,7 @@ router.post('/updateMyLives', async (req, res) => {
   			docs.forEach(function(live, index){
   				setLiveIsLiveNow(live)
   			})
-    		res.send(docs)
+    		res.send(removeFinishedLivesForToday(docs))
   		});
 
 });
@@ -613,7 +808,12 @@ router.get('/all', async (req, res) => {
   			docs.forEach(function(live, index){
   				setLiveIsLiveNow(live)
   			})
-    		res.send(docs)
+
+  			if(findRecord == true){
+				return res.send(docs)
+  			} else {
+  				return res.send(removeFinishedLivesForToday(docs))
+  			}
   		});
 
 });
