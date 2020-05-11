@@ -91,16 +91,19 @@ router.post('/createMinduca', function(req, res) {
 		req.body[index].dateUTC = moment(`${req.body[index].date} ${req.body[index].time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours')
 	})
 
+	console.log(`MANDOU NO MINDUCA: ${req.body}`)
+
 	Live.insertMany(req.body)
 	    .then(function (docs) {
+	    	console.log(`Acabou de criar as lives: ${docs}`)
 	    	docs.forEach(function(docs, index){
 	    		createPushesForNewLive(req.body[index], docs[index])
 	    	})
 	        res.json(docs);
 	    })
-	    .catch(function (err) {
-	        res.status(500).send(err);
-	    });
+	    // .catch(function (err) {
+	    //     res.status(500).send(err);
+	    // });
 });
 
 
