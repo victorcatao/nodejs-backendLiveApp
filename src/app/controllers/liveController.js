@@ -134,6 +134,7 @@ router.post('/create', function(req, res) {
 
 
 function createPushesForNewLive(body, live) {
+	console.log(`Vai criar push para o body: \n${body} LIVE:\n${live}`)
 	// PUSH QUANDO A LIVE COMECAR
 	var titleStart = "Começooooou!"
 	var bodyStart = `Começou a live com ${body.name}! Acesse pelo app ;)`
