@@ -559,14 +559,14 @@ router.post('/addToCalendar', async (req, res) => {
 
 
 function schedulePush(push) {
-	console.log('schedulePush: Vai programar o Push:\n' + push.body)
+	// console.log('schedulePush: Vai programar o Push:\n' + push.body)
 	var k = schedule.scheduleJob(push.id, push.scheduledTime, function(){
 				sendPush(push)
 			})
 }
 
 function sendPush(push) {
-	console.log('sendPush: Vai ENVIAR o Push: ' + push.body)
+	// console.log('sendPush: Vai ENVIAR o Push: ' + push.body)
 	firebase.sendPushV2(push)
 
 	Push.deleteOne({ '_id': push.id }, function(err){
@@ -584,11 +584,11 @@ function sendPush(push) {
 
 
 function sponsorPush(push){
-	console.log(push)
+	// console.log(push)
 
 	if(push.isLive == true) {
 		const scheduledTimeOnTime = getScheduledTimeToPushOnTime(push.date, push.time)
-		console.log(scheduledTimeOnTime)
+		// console.log(scheduledTimeOnTime)
 		var k = schedule.scheduleJob(scheduledTimeOnTime, function(){
 			firebase.sendPush(push.firebaseToken, "Começooooou!", `Começou a live com ${push.name}! Acesse pelo app ;)`, push.url)
 
