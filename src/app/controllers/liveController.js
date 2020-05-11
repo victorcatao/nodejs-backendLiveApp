@@ -20,6 +20,7 @@ const liveEstimatedTime = 12600000 // 3h 30m
 
 // FORMATO DE PUSH ANTIGO
 // Isso é pra reprogramar as rotinas que morreram por conta do servidor ter sido restartado
+
 PushScheduled.find().then(
 	function(docs) {
 		var shouldScheduleIds = []
@@ -46,14 +47,18 @@ PushScheduled.find().then(
 
 
 
-Push.find().then(
-	function(docs){
-		docs.forEach(function(push, index) {
-			console.log('RECUPERANDO PUSH V2 QUE NAO FOI ENVIADO')
-			schedulePush(push)
-		})
-	}
-)
+
+startAllPushes()
+function startAllPushes() {
+	Push.find().then(
+		function(docs){
+			docs.forEach(function(push, index) {
+				console.log('RECUPERANDO PUSH V2 QUE NAO FOI ENVIADO')
+				schedulePush(push)
+			})
+		}
+	)
+}
 
 
 router.post('/sendSuggestion', function(req, res) {
@@ -89,7 +94,7 @@ router.post('/createMinduca', function(req, res) {
 	Live.insertMany(req.body)
 	    .then(function (docs) {
 	    	docs.forEach(function(docs, index){
-	    		createPushesForNewLive(req.body[index])
+	    		createPushesForNewLive(req.body[index], docs[index])
 	    	})
 	        res.json(docs);
 	    })
@@ -121,18 +126,18 @@ router.post('/create', function(req, res) {
 			res.status(400).send({'errorMessage': error.message});
 			return
 		} else {
-			createPushesForNewLive(req.body)
+			createPushesForNewLive(req.body, live)
 			res.send(live)
 		}
 	})
 });
 
 
-function createPushesForNewLive(body) {
+function createPushesForNewLive(body, live) {
 	// PUSH QUANDO A LIVE COMECAR
 	var titleStart = "Começooooou!"
 	var bodyStart = `Começou a live com ${body.name}! Acesse pelo app ;)`
-	var urlStart = req.body.url[0]
+	var urlStart = body.url[0]
 
 	if(body.push.title) {
 		titleStart = body.push.title
@@ -464,6 +469,18 @@ router.post('/deletePushes', async (req, res) => {
 	}	
 })
 
+router.post('/restartPushes', async (req, res) => {
+	Push.find().then(function(docs){
+		docs.forEach(function(push, index){
+			schedule.scheduledJobs[push.id].cancel()
+		})
+
+		startAllPushes()
+
+	})
+	res.send()
+})
+
 
 // DEPRECATED
 router.post('/addToCalendar', async (req, res) => {
@@ -542,7 +559,7 @@ router.post('/addToCalendar', async (req, res) => {
 
 function schedulePush(push) {
 	console.log('schedulePush: Vai programar o Push:\n' + push.body)
-	var k = schedule.scheduleJob(push.scheduledTime, function(){
+	var k = schedule.scheduleJob(push.id, push.scheduledTime, function(){
 				sendPush(push)
 			})
 }
