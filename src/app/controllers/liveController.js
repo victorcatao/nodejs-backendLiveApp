@@ -97,7 +97,7 @@ router.post('/createMinduca', function(req, res) {
 	    .then(function (docs) {
 	    	console.log(`Acabou de criar as lives: ${docs}`)
 	    	docs.forEach(function(doc, index){
-	    		createPushesForNewLive(req.body[index], doc[index])
+	    		createPushesForNewLive(req.body[index], doc)
 	    	})
 	        res.json(docs);
 	    })
