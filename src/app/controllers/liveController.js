@@ -96,8 +96,8 @@ router.post('/createMinduca', function(req, res) {
 	Live.insertMany(req.body)
 	    .then(function (docs) {
 	    	console.log(`Acabou de criar as lives: ${docs}`)
-	    	docs.forEach(function(docs, index){
-	    		createPushesForNewLive(req.body[index], docs[index])
+	    	docs.forEach(function(doc, index){
+	    		createPushesForNewLive(req.body[index], doc[index])
 	    	})
 	        res.json(docs);
 	    })
