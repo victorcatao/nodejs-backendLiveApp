@@ -44,15 +44,6 @@ PushScheduled.find().then(
 	}
 );
 
-Push.find().populate('liveId').exec(function(err, pushes){
-	pushes.forEach(function(push, index){
-		if(!push.url || push.url == "h") {
-			push.url = push.liveId.url[0]
-			push.save()
-		}
-	})
-})
-
 
 
 
