@@ -534,7 +534,7 @@ router.post('/addToCalendar', async (req, res) => {
 
 	PushScheduled.find({
 		firebaseToken: firebaseToken,
-		title: titlePush
+		name: name
 	}, function(err, docs){
 		if(err) {
 			console.log(`Erro ao tentar se inscrever: ${err}`)
@@ -543,7 +543,7 @@ router.post('/addToCalendar', async (req, res) => {
 		if(docs.length >= 1) {
 			console.log(docs)
 			console.log(`Tentou se inscrever em push duplicado`)
-			// return res.send() // duplicado
+			return res.send() // duplicado
 		}
 
 		// BLZ, VAI CRIAR UM CARA NOVO
