@@ -783,14 +783,7 @@ router.post('/updateMyLives', async (req, res) => {
 			dateUTC: {
 	    		$gte: startToday
   			}
-	    }
-	    [],
-	    {
-			sort: {
-			    dateUTC: 1 //Sort by Date Added DESC
-			}
-  		},
-  		function(err, docs){
+	    }, function(err, docs){
   			docs.forEach(function(live, index){
   				setLiveIsLiveNow(live)
   			})
