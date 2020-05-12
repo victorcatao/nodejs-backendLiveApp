@@ -543,7 +543,7 @@ router.post('/addToCalendar', async (req, res) => {
 		if(docs.length >= 1) {
 			console.log(docs)
 			console.log(`Tentou se inscrever em push duplicado`)
-			return res.send() // duplicado
+			// return res.send() // duplicado
 		}
 
 		// BLZ, VAI CRIAR UM CARA NOVO
