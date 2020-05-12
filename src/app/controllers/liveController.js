@@ -531,7 +531,22 @@ router.post('/addToCalendar', async (req, res) => {
 	var titlePush = !req.body.titlePush ? "Olho na Live!" : req.body.titlePush
 	var bodyPush = !req.body.bodyPush ? `Daqui a pouco tem live com ${name}! Fique ligado ;)` : req.body.bodyPush
 
-	var push = new PushScheduled(
+
+	PushScheduled.find({
+		firebaseToken: firebaseToken,
+		title: titlePush
+	}, function(err, docs){
+		if(err) {
+			console.log(`Erro ao tentar se inscrever: ${err}`)
+			return res.send()
+		}
+		if(docs.length >= 1) {
+			console.log(`Tentou se inscrever em push duplicado`)
+			return res.send() // duplicado
+		}
+
+		// BLZ, VAI CRIAR UM CARA NOVO
+		var push = new PushScheduled(
 			{
 				firebaseToken: firebaseToken,
 				name: name,
@@ -545,17 +560,20 @@ router.post('/addToCalendar', async (req, res) => {
 			}
 		);
 
-	push.save(
-		function(error, doc) {
-			if(error) {
-				console.log(error)
+		push.save(
+			function(error, doc) {
+				if(error) {
+					console.log(error)
+				}
+				sponsorPush(doc)
+				res.send()
 			}
-			// console.log(doc)
-			// schedulePush(firebaseToken, name, date, time, doc.id)
-			sponsorPush(doc)
-			res.send()
-		}
-	)
+		)
+
+	})
+
+
+	
 
 });
 
