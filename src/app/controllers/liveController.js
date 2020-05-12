@@ -780,6 +780,7 @@ router.post('/updateMyLives', async (req, res) => {
 	Live.find(
 		{
 			'_id': { $in: ids },
+			hidden: false,
 			dateUTC: {
 	    		$gte: startToday
   			}
