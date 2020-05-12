@@ -541,7 +541,6 @@ router.post('/addToCalendar', async (req, res) => {
 			return res.send()
 		}
 		if(docs.length >= 1) {
-			console.log(docs)
 			console.log(`Tentou se inscrever em push duplicado`)
 			return res.send() // duplicado
 		}
@@ -776,8 +775,6 @@ router.post('/updateMyLives', async (req, res) => {
     	ids.push(mongoose.Types.ObjectId(id))
     })
 
-    // verificar se eh vazio e mandar de volta
-
     const startToday = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').format()
 
 	Live.find(
@@ -787,7 +784,13 @@ router.post('/updateMyLives', async (req, res) => {
 	    		$gte: startToday
   			}
 	    }
-	    ,function(err, docs){
+	    [],
+	    {
+			sort: {
+			    dateUTC: 1 //Sort by Date Added DESC
+			}
+  		},
+  		function(err, docs){
   			docs.forEach(function(live, index){
   				setLiveIsLiveNow(live)
   			})
