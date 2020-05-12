@@ -1,7 +1,10 @@
 const mongoose = require('../../database/index.js');
 
 const PushSchema = new mongoose.Schema({
-  liveId: mongoose.Schema.Types.ObjectId,
+  liveId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Live'
+  },
   title: String,
   body: String,
   url: String,

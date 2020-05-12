@@ -44,6 +44,14 @@ PushScheduled.find().then(
 	}
 );
 
+Push.find().populate('liveId').exec(function(err, pushes){
+	pushes.forEach(function(push, index){
+		if(!push.url || push.url == "h") {
+			push.url = push.liveId.url[0]
+			push.save()
+		}
+	})
+})
 
 
 
@@ -141,7 +149,7 @@ function createPushesForNewLive(body, live) {
 	// PUSH QUANDO A LIVE COMECAR
 	var titleStart = "Começooooou!"
 	var bodyStart = `Começou a live com ${body.name}! Acesse pelo app ;)`
-	var urlStart = body.url[0]
+	var urlStart = live.url[0]
 
 	if(body.push && body.push.title) {
 		titleStart = body.push.title
@@ -178,7 +186,7 @@ function createPushesForNewLive(body, live) {
 	// PUSH DE AVISO ANTES DA LIVE COMECAR
 	var titleBefore = 'Olha na live!'
 	var bodyBefore = `Daqui a pouco tem live com ${body.name}! Fique ligado ;)`
-	var urlBefore = body.url[0]
+	var urlBefore = live.url[0]
 
 	if(body.push && body.push.pushBefore.title){
 		titleBefore = body.push.pushBefore.title
