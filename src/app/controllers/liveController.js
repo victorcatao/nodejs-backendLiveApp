@@ -1,5 +1,6 @@
 const express = require('express');
 const moment = require('moment')
+const timeHelper = require('../helpers/timeHelper')
 const router = express.Router();
 const firebase = require('../helpers/firebase')
 const Live = require('../models/live');
@@ -87,7 +88,7 @@ router.post('/sendSuggestion', function(req, res) {
 router.post('/createMinduca', function(req, res) {
 
 	req.body.forEach(function(live, index){
-		req.body[index].dateUTC = moment(`${req.body[index].date} ${req.body[index].time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours')
+		req.body[index].dateUTC = timeHelper.getDateUTC(live.date, live.time)
 	})
 
 	console.log(`MANDOU NO MINDUCA: ${req.body}`)
@@ -118,7 +119,7 @@ router.post('/create', function(req, res) {
 		return res.status(400).send({'errorMessage': 'time no formato inválido. Correto: HH:mm'})
 	}
 
-	req.body.dateUTC = moment(`${req.body.date} ${req.body.time}`, "DD-MM-YYYY HH:mm").tz("UTC").add(3, 'hours')
+	req.body.dateUTC = timeHelper.getDateUTC(req.body.date, req.body.time)
 
 	var live = new Live(req.body);
 
@@ -160,7 +161,7 @@ function createPushesForNewLive(body, live) {
 		  	title: titleStart,
 		  	body: bodyStart,
 		  	url: urlStart,
-		  	scheduledTime: getScheduledTimeToPushOnTime(body.date, body.time),
+		  	scheduledTime: timeHelper.getScheduledTimeToPushOnTime(body.date, body.time),
 		  	isWarning: false,
 		  	isLive: true
 		}
@@ -197,7 +198,7 @@ function createPushesForNewLive(body, live) {
 		  	title: titleBefore,
 		  	body: bodyBefore,
 		  	url: urlBefore,
-		  	scheduledTime: getScheduledTimeToPush(body.date, body.time),
+		  	scheduledTime: timeHelper.getScheduledTimeToPush(body.date, body.time),
 		  	isWarning: true,
 		  	isLive: true
 		}
@@ -214,7 +215,7 @@ function createPushesForNewLive(body, live) {
 			  	title: body.push.pushSponsored.title,
 			  	body: body.push.pushSponsored.body,
 			  	url: body.push.pushSponsored.url,
-			  	scheduledTime: getScheduledTimeToPushOnTime(body.push.pushSponsored.date, body.push.pushSponsored.time),
+			  	scheduledTime: timeHelper.getScheduledTimeToPushOnTime(body.push.pushSponsored.date, body.push.pushSponsored.time),
 			  	isWarning: false,
 			  	isSponsored: true,
 			  	isLive: true
@@ -242,7 +243,7 @@ router.post('/convertEverybody', function(req, res) {
 				  	title: titleStart,
 				  	body: bodyStart,
 				  	url: live.url[0],
-				  	scheduledTime: getScheduledTimeToPushOnTime(live.date, live.time),
+				  	scheduledTime: timeHelper.getScheduledTimeToPushOnTime(live.date, live.time),
 				  	isWarning: false,
 				  	isLive: true
 				}
@@ -262,7 +263,7 @@ router.post('/convertEverybody', function(req, res) {
 				  	title: titleBefore,
 				  	body: bodyBefore,
 				  	url: live.url[0],
-				  	scheduledTime: getScheduledTimeToPush(live.date, live.time),
+				  	scheduledTime: timeHelper.getScheduledTimeToPush(live.date, live.time),
 				  	isWarning: true,
 				  	isLive: true
 				}
@@ -507,7 +508,7 @@ router.post('/addToCalendar', async (req, res) => {
 			title: pushSponsored.title,
 			body: pushSponsored.body,
 			url: pushSponsored.url,
-			scheduledTime: getScheduledTimeToPushOnTime(pushSponsored.date, pushSponsored.time),
+			scheduledTime: timeHelper.getScheduledTimeToPushOnTime(pushSponsored.date, pushSponsored.time),
 			platform: req.body.platform,
 			isLive: false
 		})
@@ -553,7 +554,7 @@ router.post('/addToCalendar', async (req, res) => {
 			 	time: time,
 			 	title: titlePush,
 			 	body: bodyPush,
-				scheduledTime: getScheduledTimeToPush(date, time),
+				scheduledTime: timeHelper.getScheduledTimeToPush(date, time),
 				platform: req.body.platform,
 				isLive: true
 			}
@@ -607,7 +608,7 @@ function sponsorPush(push){
 	// console.log(push)
 
 	if(push.isLive == true) {
-		const scheduledTimeOnTime = getScheduledTimeToPushOnTime(push.date, push.time)
+		const scheduledTimeOnTime = timeHelper.getScheduledTimeToPushOnTime(push.date, push.time)
 		// console.log(scheduledTimeOnTime)
 		var k = schedule.scheduleJob(scheduledTimeOnTime, function(){
 			firebase.sendPush(push.firebaseToken, "Começooooou!", `Começou a live com ${push.name}! Acesse pelo app ;)`, push.url)
@@ -642,7 +643,7 @@ function sponsorPush(push){
 
 // function schedulePush(firebaseToken, name, date, time, pushMongoDBId){
 
-// 	const scheduledTime = getScheduledTimeToPush(date, time)
+// 	const scheduledTime = timeHelper.getScheduledTimeToPush(date, time)
 
 // 	var j = schedule.scheduleJob(scheduledTime, function(){
 // 		firebase.sendPush(firebaseToken, "Olho na Live!", `Daqui a pouco tem live com ${name}! Fique ligado ;)`)
@@ -657,7 +658,7 @@ function sponsorPush(push){
 // 	});
 
 
-// 	const scheduledTimeOnTime = getScheduledTimeToPushOnTime(date, time)
+// 	const scheduledTimeOnTime = timeHelper.getScheduledTimeToPushOnTime(date, time)
 
 // 	var k = schedule.scheduleJob(scheduledTimeOnTime, function(){
 // 		firebase.sendPush(firebaseToken, "Começooooou!", `Começou a live com ${name}! Acesse pelo app ;)`)
@@ -673,17 +674,6 @@ function sponsorPush(push){
 // }
 
 
-function getScheduledTimeToPush(date, time) {
-	const liveDateTime = `${date} ${time}`
-	return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').subtract(30, 'minutes').format('YYYY-MM-DD HH:mm:ss')
-	// return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").subtract(3, 'hours').subtract(2, 'minutes').format('YYYY-MM-DD HH:mm:ss')
-}
-
-function getScheduledTimeToPushOnTime(date, time) {
-	const liveDateTime = `${date} ${time}`
-	return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").add(3, 'hours').format('YYYY-MM-DD HH:mm:ss')
-	// return moment(liveDateTime, "DD/MM/YYYY HH:mm").tz("UTC").subtract(3, 'hours').format('YYYY-MM-DD HH:mm:ss')
-}
 
 
 
@@ -751,18 +741,18 @@ function setLiveIsLiveNow(live) {
 }
 
 function removeFinishedLivesForToday(lives) {
-	return lives
-	// var filteredResult = []
-	// lives.forEach(function(live, index){
-	// 	const diff = Date.now() - live.dateUTC
-	// 	if(diff > liveEstimatedTime && live.forcedLive == false) {
-	// 		// NAO DEVE APARECER PQ JA PASSOU DAS HORAS DELE
-	// 	} else {
-	// 		filteredResult.push(live)
-	// 	}	
-	// })
+	// return lives
+	var filteredResult = []
+	lives.forEach(function(live, index){
+		const diff = Date.now() - live.dateUTC
+		if(diff > liveEstimatedTime && live.forcedLive == false) {
+			// NAO DEVE APARECER PQ JA PASSOU DAS HORAS DELE
+		} else {
+			filteredResult.push(live)
+		}	
+	})
 	
-	// return filteredResult
+	return filteredResult
 }
 
 
