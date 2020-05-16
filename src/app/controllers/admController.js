@@ -10,6 +10,30 @@ const firebase = require('../helpers/firebase')
 
 const router = express.Router();
 
+
+const liveEstimatedTime = 12600000 // 3h 30m
+
+
+router.get('/getAllLives', async (req, res) => {
+
+  	
+	Live.find(
+		{},
+  		[],
+  		{
+			sort: {
+			    dateUTC: 1 //Sort by Date Added DESC
+			}
+  		},
+  		function(err, docs){
+  			docs.forEach(function(live, index){
+  				setLiveIsLiveNow(live)
+  			})
+    		res.send(docs)
+  		});
+
+});
+
 router.post('/update/dateTime', async (req, res) => {
 
 	if(!req.body.time || !req.body.date || !req.body.liveId) {
@@ -269,6 +293,21 @@ function sendPush(push) {
 	})
 }
 
+
+
+function setLiveIsLiveNow(live) {
+	if(live.forcedLive == true) {
+		live.live = true
+		return
+	}
+
+	if(live.isRecorded == true) {
+		live.live = false
+	} else {
+		var diff = live.dateUTC - Date.now()
+	  	live.live = diff < 0  && diff > -liveEstimatedTime	
+	}
+}
 
 
 

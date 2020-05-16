@@ -735,7 +735,6 @@ function setLiveIsLiveNow(live) {
 		live.live = false
 	} else {
 		var diff = live.dateUTC - Date.now()
-		var liveEstimatedTime = 12600000
 	  	live.live = diff < 0  && diff > -liveEstimatedTime	
 	}
 }
