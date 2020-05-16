@@ -2,6 +2,7 @@ const express = require('express')
 const moment = require('moment')
 const Live = require('../models/live')
 const Push = require('../models/push')
+const Suggestion = require('../models/suggestion')
 const schedule = require('node-schedule')
 const mongoose = require('mongoose')
 const timeHelper = require('../helpers/timeHelper')
@@ -203,6 +204,34 @@ router.post('/search', async (req, res) => {
 });
 
 
+router.get('/suggestions/getAll', async (req, res) => {
+	
+  	Suggestion.find({}, function(error, suggestions){
+	  		if(error) { 
+	  			return res.status(400).send(error) 
+	  		}
+	  		res.send(suggestions)
+  		}
+  	)
+
+});
+
+
+
+
+router.post('/suggestions/delete', async (req, res) => {
+	if(!req.body.suggestionId) {
+		return res.status(400).send('suggestionId vazio')
+	}
+
+	Suggestion.deleteOne({ '_id': req.body.suggestionId }, function (err) {
+		if (err) {
+    		return res.status(400).send({ error: err })
+    	}
+    	res.send('Deletou')
+	});
+
+});
 
 
 
@@ -218,8 +247,11 @@ function restartPushes() {
 }
 
 
+
+
 function schedulePush(push) {
 	// console.log('schedulePush: Vai programar o Push:\n' + push.body)
+	schedule.scheduledJobs[push.id].cancel()
 	var k = schedule.scheduleJob(push.id, push.scheduledTime, function(){
 				sendPush(push)
 			})
