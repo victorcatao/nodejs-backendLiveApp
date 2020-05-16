@@ -122,7 +122,7 @@ router.post('/update/url', async (req, res) => {
 
 router.post('/update/recorded', async (req, res) => {
 
-	if(req.body.isRecorded == null || req.body.isRecorded == "" || !req.body.liveId) {
+	if(!req.body.liveId) {
 		return res.status(400).send('Faltou recorded ou liveId')
 	}
 
