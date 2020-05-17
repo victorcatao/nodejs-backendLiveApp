@@ -36,5 +36,6 @@ function removeFinishedLivesForToday(lives) {
 
 module.exports = {
 	setLiveIsLiveNow: setLiveIsLiveNow,
-  	liveEstimatedTime: liveEstimatedTime
+  	liveEstimatedTime: liveEstimatedTime,
+  	removeFinishedLivesForToday: removeFinishedLivesForToday
 }
