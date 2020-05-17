@@ -180,6 +180,7 @@ router.post('/delete/live', async (req, res) => {
     		if (errPush) {
     			return res.status(400).send(responseHelper.jsonError(errPush))
     		}
+    		pushHelper.restartPushes()
     		res.send(responseHelper.jsonSuccess('Deletou com sucesso'))
     	});
 	});
