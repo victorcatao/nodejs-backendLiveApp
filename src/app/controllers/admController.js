@@ -241,7 +241,7 @@ router.get('/suggestions/getAll', async (req, res) => {
 
 
 
-router.get('/suggestions/deleteAll', async (req, res) => {
+router.post('/suggestions/deleteAll', async (req, res) => {
 	
   	Suggestion.remove({}, function(error, suggestions){
 	  		if(error) { 
