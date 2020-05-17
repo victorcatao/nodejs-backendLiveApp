@@ -8,7 +8,7 @@ const timeHelper = require('../helpers/timeHelper')
 const pushHelper = require('../helpers/pushHelper')
 const liveHelper = require('../helpers/liveHelper')
 const firebase = require('../helpers/firebase')
-const responseHelper = require('../helpers/responseHelper.js')
+const responseHelper = require('../helpers/responseHelper')
 
 const router = express.Router();
 

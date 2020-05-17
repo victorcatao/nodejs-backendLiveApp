@@ -4,11 +4,11 @@ const jsonError = function jsonError(message) {
 }
 
 
-const jsonSucces = function jsonSucces(message) {
+const jsonSuccess = function jsonSucces(message) {
   return { successMessage: message }
 }
 
 module.exports = {
   jsonError: jsonError,
-  jsonSucces: jsonSucces
+  jsonSuccess: jsonSuccess
 }
