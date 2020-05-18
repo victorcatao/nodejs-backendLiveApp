@@ -106,7 +106,7 @@ const schedulePush = function schedulePush(push) {
 }
 
 const sendPush = function sendPush(push) {
-	// console.log('sendPush: Vai ENVIAR o Push: ' + push.body)
+	console.log('sendPush: Vai ENVIAR o Push: ' + push.body)
 	firebase.sendPushV2(push)
 
 	Push.deleteOne({ '_id': push.id }, function(err){
