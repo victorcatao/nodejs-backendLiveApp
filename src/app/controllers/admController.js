@@ -27,7 +27,7 @@ router.get('/getAllLives', async (req, res) => {
     		$lte: startToday
   		}
   	}
-
+  	console.log(jsonFind)
 	Live.find(
 		jsonFind,
   		[],
