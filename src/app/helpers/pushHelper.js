@@ -97,9 +97,9 @@ const createPushesForNewLive = function createPushesForNewLive(body, live) {
 
 const schedulePush = function schedulePush(push) {
 	// console.log('schedulePush: Vai programar o Push:\n' + push.body)
-	if(schedule.scheduledJobs[push.id]) {
-		schedule.scheduledJobs[push.id].cancel()
-	}
+	// if(schedule.scheduledJobs[push.id]) {
+		// schedule.scheduledJobs[push.id].cancel()
+	// }
 	var k = schedule.scheduleJob(push.id, push.scheduledTime, function(){
 				sendPush(push)
 			})
