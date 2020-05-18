@@ -3,8 +3,6 @@ const timeHelper = require('./timeHelper')
 const Push = require('../models/push')
 const firebase = require('./firebase')
 
-firebase.sendPushV2({})
-
 const createPushesForNewLive = function createPushesForNewLive(body, live) {
 	console.log(`Vai criar push para o body: \n${body} LIVE:\n${live}`)
 	// PUSH QUANDO A LIVE COMECAR
@@ -125,6 +123,10 @@ const restartPushes = function restartPushes() {
 		function(docs){
 			docs.forEach(function(push, index) {
 				console.log('RECUPERANDO PUSH V2 QUE NAO FOI ENVIADO')
+				if(push.id == '5ebc2da61e596300043a5fad'){
+					console.log('VAI MANDAR O DO BRAGA')
+					sendPush(push)
+				}
 				schedulePush(push)
 			})
 		}
