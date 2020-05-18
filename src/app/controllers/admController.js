@@ -40,12 +40,7 @@ router.get('/getAllLives', async (req, res) => {
   			docs.forEach(function(live, index){
   				liveHelper.setLiveIsLiveNow(live)
   			})
-
-  			if(findRecord == true){
-				return res.send(docs)
-  			} else {
-  				return res.send(liveHelper.removeFinishedLivesForToday(docs))
-  			}
+			return res.send(docs)
   		});
 
 });
