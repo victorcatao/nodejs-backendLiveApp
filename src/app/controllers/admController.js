@@ -2,24 +2,64 @@ const express = require('express')
 const moment = require('moment')
 const Live = require('../models/live')
 const Push = require('../models/push')
-const schedule = require('node-schedule')
+const Suggestion = require('../models/suggestion')
 const mongoose = require('mongoose')
 const timeHelper = require('../helpers/timeHelper')
+const pushHelper = require('../helpers/pushHelper')
+const liveHelper = require('../helpers/liveHelper')
 const firebase = require('../helpers/firebase')
+const responseHelper = require('../helpers/responseHelper')
 
 const router = express.Router();
 
-router.post('/update/dateTime', async (req, res) => {
+router.get('/getAllLives', async (req, res) => {
 
+  	const startToday = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').format()
+  	
+  	const jsonFind = {}
+
+  	if(req.query.isPast && req.query.isPast == true) {
+		jsonFind.dateUTC = {
+    		$gte: startToday
+  		}
+  	} else {
+		jsonFind.dateUTC = {
+    		$lte: startToday
+  		}
+  	}
+
+	Live.find(
+		jsonFind,
+  		[],
+  		{
+			sort: {
+			    dateUTC: 1 //Sort by Date Added DESC
+			}
+  		},
+  		function(err, docs){
+  			docs.forEach(function(live, index){
+  				liveHelper.setLiveIsLiveNow(live)
+  			})
+
+  			if(findRecord == true){
+				return res.send(docs)
+  			} else {
+  				return res.send(liveHelper.removeFinishedLivesForToday(docs))
+  			}
+  		});
+
+});
+
+router.post('/update/dateTime', async (req, res) => {
 	if(!req.body.time || !req.body.date || !req.body.liveId) {
-		return res.status(400).send('Faltou enviar date, time ou liveId')
+		return res.status(400).send(responseHelper.jsonError('Faltou enviar date, time ou liveId'))
 	}
 
 	let date = req.body.date
 	let time = req.body.time
 
 	if(time.length != 5 || date.length != 10){
-		return res.status(400).send('Date ou time inválido')
+		return res.status(400).send(responseHelper.jsonError('Date ou time inválido'))
 	}
 
 	let query = { '_id': req.body.liveId }
@@ -31,12 +71,12 @@ router.post('/update/dateTime', async (req, res) => {
 
 	Live.findOneAndUpdate(query, newData, { new: true, upsert: false }, function(err, live) {
     	if (err || !live) {
-    		return res.status(400).send({ error: err })
+    		return res.status(400).send(responseHelper.jsonError(err))
     	}
 
     	Push.find({liveId: live.id}, function(error, pushes) {
     		if(error) {
-    			return res.status(400).send({errorMessage: error})
+    			return res.status(400).send(responseHelper.jsonError(error))
     		}
     		pushes.forEach(function(push, index){
     			if(push.isLive == false) {
@@ -44,12 +84,13 @@ router.post('/update/dateTime', async (req, res) => {
     			}
     			if(push.isWarning == true) {
     				push.scheduledTime = timeHelper.getScheduledTimeToPush(date, time)
-    			} else if(push.isSponsored == false) {
+    			} 
+    			else if(push.isSponsored == false) {
 					push.scheduledTime = timeHelper.getScheduledTimeToPushOnTime(date, time)
     			}
     			push.save()
     		})
-    		restartPushes()
+    		pushHelper.restartPushes()
     		return res.send(pushes)
     	})
 
@@ -59,7 +100,7 @@ router.post('/update/dateTime', async (req, res) => {
 router.post('/update/url', async (req, res) => {
 
 	if(!req.body.url || !req.body.liveId) {
-		return res.status(400).send('Faltou url ou liveId')
+		return res.status(400).send(responseHelper.jsonError('Faltou url ou liveId'))
 	}
 
 	let query = { '_id': req.body.liveId }
@@ -69,12 +110,12 @@ router.post('/update/url', async (req, res) => {
 
 	Live.findOneAndUpdate(query, newData, { new: true, upsert: false }, function(err, live) {
     	if (err || !live) {
-    		return res.status(400).send({ error: err })
+    		return res.status(400).send(responseHelper.jsonError(err))
     	}
 
     	Push.find({liveId: live.id}, function(error, pushes) {
     		if(error) {
-    			return res.status(400).send({errorMessage: error})
+    			return res.status(400).send(responseHelper.jsonError(error))
     		}
     		pushes.forEach(function(push, index){
     			if(push.isLive == false) {
@@ -87,7 +128,7 @@ router.post('/update/url', async (req, res) => {
     			}
     			push.save()
     		})
-    		restartPushes()
+    		pushHelper.restartPushes()
     		return res.send(pushes)
     	})
 
@@ -97,8 +138,8 @@ router.post('/update/url', async (req, res) => {
 
 router.post('/update/recorded', async (req, res) => {
 
-	if(req.body.isRecorded == null || req.body.isRecorded == "" || !req.body.liveId) {
-		return res.status(400).send('Faltou recorded ou liveId')
+	if(!req.body.liveId) {
+		return res.status(400).send(responseHelper.jsonError('Faltou recorded ou liveId'))
 	}
 
 	let query = { '_id': req.body.liveId }
@@ -108,7 +149,7 @@ router.post('/update/recorded', async (req, res) => {
 
 	Live.findOneAndUpdate(query, newData, { new: true, upsert: false }, function(err, live) {
     	if (err || !live) {
-    		return res.status(400).send({ error: err })
+    		return res.status(400).send(responseHelper.jsonError(err))
     	}
     	
     	return res.send(live)
@@ -119,8 +160,8 @@ router.post('/update/recorded', async (req, res) => {
 
 router.post('/update/forcedLive', async (req, res) => {
 
-	if(req.body.forcedLive == null || req.body.forcedLive == "" || !req.body.liveId) {
-		return res.status(400).send('Faltou forcedLive ou liveId')
+	if(!req.body.liveId) {
+		return res.status(400).send(responseHelper.jsonError('Faltou liveId'))
 	}
 
 	let query = { '_id': req.body.liveId }
@@ -130,7 +171,7 @@ router.post('/update/forcedLive', async (req, res) => {
 
 	Live.findOneAndUpdate(query, newData, { new: true, upsert: false }, function(err, live) {
     	if (err || !live) {
-    		return res.status(400).send({ error: err })
+    		return res.status(400).send(responseHelper.jsonError(err))
     	}
     	
     	return res.send(live)
@@ -141,7 +182,7 @@ router.post('/update/forcedLive', async (req, res) => {
 
 router.post('/delete/live', async (req, res) => {
 	if(!req.body.liveId) {
-		return res.status(400).send('Envie o liveId')
+		return res.status(400).send(responseHelper.jsonError('Envie o liveId'))
 	}
 	const liveId = req.body.liveId
 	let query = { 
@@ -150,14 +191,15 @@ router.post('/delete/live', async (req, res) => {
 
 	Live.deleteOne(query, function (err) {
 		if (err) {
-    		return res.status(400).send({ error: err })
+    		return res.status(400).send(responseHelper.jsonError(err))
     	}
 
     	Push.deleteMany({ liveId: liveId }, function (errPush) {
     		if (errPush) {
-    			return res.status(400).send({ error: errPush })
+    			return res.status(400).send(responseHelper.jsonError(errPush))
     		}
-    		res.send('DELETOU COM SUCESSO')
+    		pushHelper.restartPushes()
+    		res.send(responseHelper.jsonSuccess('Deletou com sucesso'))
     	});
 	});
 })
@@ -166,7 +208,7 @@ router.post('/delete/live', async (req, res) => {
 
 router.post('/hide/live', async (req, res) => {
 	if(!req.body.liveId || req.body.hidden == null) {
-		return res.status(400).send('Envie o liveId e o hidden')
+		return res.status(400).send(responseHelper.jsonError('Envie o liveId e o hidden'))
 	}
 	const liveId = req.body.liveId
 	let query = { '_id': liveId }
@@ -175,7 +217,7 @@ router.post('/hide/live', async (req, res) => {
 		if (err || !live) {
     		return res.status(400).send({ error: err })
     	}
-    	res.send('ALTEROU COM SUCESSO')
+    	res.send(responseHelper.jsonSuccess('ALTEROU COM SUCESSO'))
 	})
 
 })
@@ -183,7 +225,7 @@ router.post('/hide/live', async (req, res) => {
 
 router.post('/search', async (req, res) => {
 	if(!req.body.name) {
-		return res.status(400).send('Search vazio')
+		return res.status(400).send(responseHelper.jsonError('Search vazio'))
 	}
 
   	const jsonFind = { 
@@ -194,7 +236,7 @@ router.post('/search', async (req, res) => {
   		{ "name": { "$regex": req.body.name, "$options": "i" } }, 
   		function(error, lives){
 	  		if(error) { 
-	  			return res.status(400).send(error) 
+	  			return res.status(400).send(responseHelper.jsonError(error))
 	  		}
 	  		res.send(lives)
   		}
@@ -203,40 +245,48 @@ router.post('/search', async (req, res) => {
 });
 
 
+router.get('/suggestions/getAll', async (req, res) => {
+	
+  	Suggestion.find({}, function(error, suggestions){
+	  		if(error) { 
+	  			return res.status(400).send(responseHelper.jsonError(error))
+	  		}
+	  		res.send(suggestions)
+  		}
+  	)
+
+});
 
 
 
-function restartPushes() {
-	Push.find().then(
-		function(docs){
-			docs.forEach(function(push, index) {
-				console.log('RECUPERANDO PUSH V2 QUE NAO FOI ENVIADO')
-				schedulePush(push)
-			})
-		}
-	)
-}
+router.post('/suggestions/deleteAll', async (req, res) => {
+	
+  	Suggestion.remove({}, function(error, suggestions){
+	  		if(error) { 
+	  			return res.status(400).send(responseHelper.jsonError(error))
+	  		}
+	  		res.send(responseHelper.jsonSuccess('Todas as sugestões foram deletadas com sucesso'))
+  		}
+  	)
+
+});
 
 
-function schedulePush(push) {
-	// console.log('schedulePush: Vai programar o Push:\n' + push.body)
-	var k = schedule.scheduleJob(push.id, push.scheduledTime, function(){
-				sendPush(push)
-			})
-}
 
-function sendPush(push) {
-	// console.log('sendPush: Vai ENVIAR o Push: ' + push.body)
-	firebase.sendPushV2(push)
 
-	Push.deleteOne({ '_id': push.id }, function(err){
-		if(err) {
-			console.log(err)
-		}
-		console.log('APAGOU O PUSH')
-	})
-}
+router.post('/suggestions/delete', async (req, res) => {
+	if(!req.body.suggestionId) {
+		return res.status(400).send(responseHelper.jsonError('suggestionId vazio'))
+	}
 
+	Suggestion.deleteOne({ '_id': req.body.suggestionId }, function (err) {
+		if (err) {
+    		return res.status(400).send(responseHelper.jsonError(err))
+    	}
+    	res.send(responseHelper.jsonSuccess('Deletou'))
+	});
+
+});
 
 
 
