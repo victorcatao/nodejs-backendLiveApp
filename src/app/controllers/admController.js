@@ -14,9 +14,22 @@ const router = express.Router();
 
 router.get('/getAllLives', async (req, res) => {
 
+  	const startToday = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').format()
   	
+  	const jsonFind = {}
+
+  	if(req.query.isPast && req.query.isPast == true) {
+		jsonFind.dateUTC = {
+    		$gte: startToday
+  		}
+  	} else {
+		jsonFind.dateUTC = {
+    		$lte: startToday
+  		}
+  	}
+
 	Live.find(
-		{},
+		jsonFind,
   		[],
   		{
 			sort: {
@@ -27,7 +40,12 @@ router.get('/getAllLives', async (req, res) => {
   			docs.forEach(function(live, index){
   				liveHelper.setLiveIsLiveNow(live)
   			})
-    		res.send(docs)
+
+  			if(findRecord == true){
+				return res.send(docs)
+  			} else {
+  				return res.send(liveHelper.removeFinishedLivesForToday(docs))
+  			}
   		});
 
 });
