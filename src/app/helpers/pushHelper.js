@@ -121,8 +121,8 @@ const sendPush = function sendPush(push) {
 const restartPushes = function restartPushes() {
 	Push.find().then(
 		function(docs){
+			console.log('RECUPERANDO PUSH V2 QUE NAO FOI ENVIADO')
 			docs.forEach(function(push, index) {
-				console.log('RECUPERANDO PUSH V2 QUE NAO FOI ENVIADO')
 				schedulePush(push)
 			})
 		}

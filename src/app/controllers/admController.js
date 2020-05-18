@@ -94,8 +94,8 @@ router.post('/update/dateTime', async (req, res) => {
 
 router.post('/update/url', async (req, res) => {
 
-	if(!req.body.url || !req.body.liveId) {
-		return res.status(400).send(responseHelper.jsonError('Faltou url ou liveId'))
+	if(!req.body.liveId) {
+		return res.status(400).send(responseHelper.jsonError('Faltou liveId'))
 	}
 
 	let query = { '_id': req.body.liveId }
