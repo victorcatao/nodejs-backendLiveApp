@@ -33,7 +33,7 @@ router.get('/getAllLives', async (req, res) => {
   		[],
   		{
 			sort: {
-			    dateUTC: 1 //Sort by Date Added DESC
+			    dateUTC: -1 //Sort by Date Added DESC
 			}
   		},
   		function(err, docs){
