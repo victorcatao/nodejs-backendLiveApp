@@ -123,10 +123,6 @@ const restartPushes = function restartPushes() {
 		function(docs){
 			docs.forEach(function(push, index) {
 				console.log('RECUPERANDO PUSH V2 QUE NAO FOI ENVIADO')
-				if(push.id == '5ebc2da61e596300043a5fad'){
-					console.log('VAI MANDAR O DO BRAGA')
-					sendPush(push)
-				}
 				schedulePush(push)
 			})
 		}
