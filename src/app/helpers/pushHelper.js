@@ -1,6 +1,9 @@
 const schedule = require('node-schedule')
 const timeHelper = require('./timeHelper')
 const Push = require('../models/push')
+const firebase = require('./firebase')
+
+firebase.sendPushV2({})
 
 const createPushesForNewLive = function createPushesForNewLive(body, live) {
 	console.log(`Vai criar push para o body: \n${body} LIVE:\n${live}`)
