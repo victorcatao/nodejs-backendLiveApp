@@ -17,14 +17,14 @@ router.get('/getAllLives', async (req, res) => {
   	const startToday = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').format()
   	
   	const jsonFind = {}
-
-  	if(req.query.isPast && req.query.isPast == true) {
+  	console.log(req.query)
+  	if(req.query.isPast == 'true' || req.query.isPast == true) {
 		jsonFind.dateUTC = {
-    		$gte: startToday
+			$lte: startToday
   		}
   	} else {
 		jsonFind.dateUTC = {
-    		$lte: startToday
+    		$gte: startToday
   		}
   	}
   	console.log(jsonFind)
@@ -33,7 +33,7 @@ router.get('/getAllLives', async (req, res) => {
   		[],
   		{
 			sort: {
-			    dateUTC: -1 //Sort by Date Added DESC
+			    dateUTC: 1 //Sort by Date Added DESC
 			}
   		},
   		function(err, docs){
