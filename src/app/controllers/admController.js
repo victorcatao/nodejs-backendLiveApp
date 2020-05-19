@@ -40,7 +40,6 @@ router.get('/getAllLives', async (req, res) => {
   			docs.forEach(function(live, index){
   				liveHelper.setLiveIsLiveNow(live)
   			})
-  			console.log(docs)
 			return res.send(docs)
   		});
 
