@@ -115,27 +115,31 @@ const sendPush = function sendPush(push) {
 }
 
 const restartPushes = function restartPushes() {
-	Push.find().then(
-		function(docs){
-			console.log('RECUPERANDO PUSHES V2 QUE NAO FORAM ENVIADOS')
+	setTimeout(function(){
 
-			docs.forEach(function(push, index) {
-				console.log(`DELETANDO PUSH: ${push.body}`)
-				if(schedule.scheduledJobs[push.id]) {
-					schedule.scheduledJobs[push.id].cancel()
-				}
-			})
+		Push.find().then(
+			function(docs){
+				console.log('RECUPERANDO PUSHES V2 QUE NAO FORAM ENVIADOS')
 
-			setTimeout(function () {
-  				console.log('CANCELOU TODOS OS JOBS ANTIGOS, AGORA BORA PROGRAMAR OS PROXIMOS')
 				docs.forEach(function(push, index) {
-					console.log(`PROGRAMANDO PUSH: ${push.body}`)
-					schedulePush(push)
+					console.log(`DELETANDO PUSH: ${push.body}`)
+					if(schedule.scheduledJobs[push.id]) {
+						schedule.scheduledJobs[push.id].cancel()
+					}
 				})
-			}, 10000) // 10segs
-			
-		}
-	).catch(error => { throw error})
+
+				setTimeout(function () {
+	  				console.log('CANCELOU TODOS OS JOBS ANTIGOS, AGORA BORA PROGRAMAR OS PROXIMOS')
+					docs.forEach(function(push, index) {
+						console.log(`PROGRAMANDO PUSH: ${push.body}`)
+						schedulePush(push)
+					})
+				}, 10000) // 10segs
+				
+			}
+		).catch(error => { throw error})
+
+	}, 5000)
 }
 
 
