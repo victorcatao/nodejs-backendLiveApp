@@ -92,6 +92,7 @@ router.post('/createMinduca', function(req, res) {
 	    	docs.forEach(function(doc, index){
 	    		pushHelper.createPushesForNewLive(req.body[index], doc)
 	    	})
+	    	pushHelper.restartPushes()
 	        res.json(docs);
 	    })
 });
@@ -119,6 +120,7 @@ router.post('/create', function(req, res) {
 			return
 		} else {
 			pushHelper.createPushesForNewLive(req.body, live)
+			pushHelper.restartPushes()
 			res.send(live)
 		}
 	})
