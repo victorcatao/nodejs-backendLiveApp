@@ -122,7 +122,7 @@ const restartPushes = function restartPushes() {
 				console.log('RECUPERANDO PUSHES V2 QUE NAO FORAM ENVIADOS')
 
 				docs.forEach(function(push, index) {
-					console.log(`DELETANDO PUSH: ${push.body}`)
+					console.log(`DESPROGRAMANDO PUSH: ${push.body}`)
 					if(schedule.scheduledJobs[push.id]) {
 						schedule.scheduledJobs[push.id].cancel()
 					}
