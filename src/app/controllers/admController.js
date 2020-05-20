@@ -130,6 +130,79 @@ router.post('/update/url', async (req, res) => {
 	});
 });
 
+router.post('/update/name', async (req, res) => {
+
+  if(!req.body.liveId || !req.body.name) {
+    return res.status(400).send(responseHelper.jsonError('Faltou liveId ou name'))
+  }
+
+  let query = { '_id': req.body.liveId }
+  let newData = {
+    name: req.body.name
+  }
+
+  Live.findOneAndUpdate(query, newData, { upsert: false }, function(err, live) {
+      if (err || !live) {
+        return res.status(400).send(responseHelper.jsonError(err))
+      }
+
+      Push.find({liveId: live.id}, function(error, pushes) {
+        if(error) {
+          return res.status(400).send(responseHelper.jsonError(error))
+        }
+        pushes.forEach(function(push, index){
+          push.body = push.body.replace(live.name, req.body.name)
+          push.save()
+        })
+        pushHelper.restartPushes()
+        return res.send(pushes)
+      })
+
+  });
+});
+
+
+
+router.post('/update/genre', async (req, res) => {
+
+  if(!req.body.liveId || !req.body.genres) {
+    return res.status(400).send(responseHelper.jsonError('Faltou liveId ou genres'))
+  }
+
+  let query = { '_id': req.body.liveId }
+  let newData = {
+    genres: req.body.genres
+  }
+
+  Live.findOneAndUpdate(query, newData, { new: true, upsert: false }, function(err, live) {
+      if (err || !live) {
+        return res.status(400).send(responseHelper.jsonError(err))
+      }
+      return res.send(live)
+  });
+});
+
+
+
+router.post('/update/socialNetwork', async (req, res) => {
+
+  if(!req.body.liveId || !req.body.socialNetwork) {
+    return res.status(400).send(responseHelper.jsonError('Faltou liveId ou socialNetwork'))
+  }
+
+  let query = { '_id': req.body.liveId }
+  let newData = {
+    social_network: req.body.socialNetwork
+  }
+
+  Live.findOneAndUpdate(query, newData, { new: true, upsert: false }, function(err, live) {
+      if (err || !live) {
+        return res.status(400).send(responseHelper.jsonError(err))
+      }
+      return res.send(live)
+  });
+});
+
 
 router.post('/update/recorded', async (req, res) => {
 
