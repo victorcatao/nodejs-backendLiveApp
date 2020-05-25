@@ -608,4 +608,11 @@ router.get('/getAllLives', async (req, res) => {
 });
 
 
+router.get('/getDonationURL', async (req, res) => {
+
+  	res.send({url: "https://secure.unicef.org.br/Default.aspx?origem=drtv&gclid=CjwKCAjwtqj2BRBYEiwAqfzur_ZpbfYUjkUqH0boMR-cmm8x0RDS8K9Xe8fKS7I2hMUEFSO513FMAhoCU98QAvD_BwE"})
+
+});
+
+
 module.exports = app => app.use('/lives', router);
