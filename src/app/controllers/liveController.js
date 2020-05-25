@@ -7,6 +7,7 @@ const responseHelper = require('../helpers/responseHelper')
 const firebase = require('../helpers/firebase')
 const Live = require('../models/live');
 const Push = require('../models/push');
+const GenreCount = require('../models/genreCount')
 const Suggestion = require('../models/suggestion')
 const PushScheduled = require('../models/pushScheduled')
 const schedule = require('node-schedule');
@@ -245,10 +246,16 @@ router.get('/findByGenre', function(req, res) {
   			})
 
   			if(findRecord == true){
-				return res.send(docs)
+				res.send(docs)
   			} else {
-  				return res.send(liveHelper.removeFinishedLivesForToday(docs))
+  				res.send(liveHelper.removeFinishedLivesForToday(docs))
   			}
+
+  			// pra analisar os dados depois do que o nosso público curte +
+			GenreCount.findOneAndUpdate({name: req.query.genre_name}, {$inc: { count: 1} }, { upsert: true, new: true, setDefaultsOnInsert: false }, function(error, counter)   {
+		        
+		    });
+
 		}
 	);
 });
