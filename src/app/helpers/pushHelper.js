@@ -6,8 +6,8 @@ const firebase = require('./firebase')
 const createPushesForNewLive = function createPushesForNewLive(body, live) {
 	console.log(`Vai criar push para o body: \n${body} LIVE:\n${live}`)
 	// PUSH QUANDO A LIVE COMECAR
-	var titleStart = "Começooooou!"
-	var bodyStart = `Começou a live com ${body.name}! Acesse pelo app ;)`
+	var titleStart = "Tá na horaaa!"
+	var bodyStart = `Tá na hora da live com ${body.name}! Clique aqui para acessar ;)`
 	var urlStart = live.url[0]
 
 	if(body.push && body.push.title) {
@@ -43,7 +43,7 @@ const createPushesForNewLive = function createPushesForNewLive(body, live) {
 
 
 	// PUSH DE AVISO ANTES DA LIVE COMECAR
-	var titleBefore = 'Olha na live!'
+	var titleBefore = 'Tá chegando a hora!'
 	var bodyBefore = `Daqui a pouco tem live com ${body.name}! Fique ligado ;)`
 	var urlBefore = live.url[0]
 
