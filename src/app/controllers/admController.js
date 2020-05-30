@@ -319,6 +319,9 @@ router.get('/suggestions/getAll', async (req, res) => {
 	  		if(error) { 
 	  			return res.status(400).send(responseHelper.jsonError(error))
 	  		}
+        suggestions.forEach(function(sug, index){
+          sug.created = moment(sug._id.getTimestamp()).format('DD/MM/YYYY')
+        })
 	  		res.send(suggestions)
   		}
   	)
