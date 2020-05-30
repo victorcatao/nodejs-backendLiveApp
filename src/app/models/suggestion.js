@@ -8,6 +8,9 @@ const SuggestionSchema = new mongoose.Schema({
   social_network: {
     type: String,
     required: 'Preencha o social_network'
+  },
+  created: {
+    type: String
   }
 });
 
