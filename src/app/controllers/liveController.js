@@ -52,6 +52,18 @@ pushHelper.restartPushes()
 
 
 router.post('/convertEverybody', function(req, res) {
+	const startDate = moment().tz("UTC").subtract(7, 'days').format()
+  	
+  	const jsonFind = { 
+  		isRecorded: false,
+  		hidden: true,
+  		dateUTC: {
+  			$lte: startDate
+  		}
+  	}
+	Live.deleteMany(jsonFind, function (err) {
+		console.log('ERROR: ' + err)
+	});
 
 });
 
