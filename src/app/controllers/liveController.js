@@ -48,30 +48,11 @@ PushScheduled.find().then(
 	}
 );
 
+removeTrash()
 pushHelper.restartPushes()
 
 
 router.post('/convertEverybody', function(req, res) {
-	const startDate = moment().tz("UTC").subtract(7, 'days').format()
-  	
-  	const jsonFind = { 
-  		isRecorded: false,
-  		dateUTC: {
-  			$lte: startDate
-  		}
-  	}
-
-	Live.deleteMany(jsonFind, function (err) {
-		console.log('ERROR: ' + err)
-	});
-
-	Push.deleteMany({
-		scheduledTime: {
-			$lte: startDate
-		}
-	}, function(err) {
-		console.log('ERROR PUSHES: ' + err)
-	})
 
 });
 
@@ -640,6 +621,33 @@ router.get('/getDonationURL', async (req, res) => {
   	res.send({url: "https://secure.unicef.org.br/Default.aspx?origem=drtv&gclid=CjwKCAjwtqj2BRBYEiwAqfzur_ZpbfYUjkUqH0boMR-cmm8x0RDS8K9Xe8fKS7I2hMUEFSO513FMAhoCU98QAvD_BwE"})
 
 });
+
+
+
+
+function removeTrash() {
+	const startDate = moment().tz("UTC").subtract(7, 'days').format()
+  	
+  	const jsonFind = { 
+  		isRecorded: false,
+  		dateUTC: {
+  			$lte: startDate
+  		}
+  	}
+
+	Live.deleteMany(jsonFind, function (err) {
+		console.log('REMOVE TRASH ERROR LIVE: ' + err)
+	});
+
+	Push.deleteMany({
+		scheduledTime: {
+			$lte: startDate
+		}
+	}, function(err) {
+		console.log('REMOVE TRASH ERROR PUSHES: ' + err)
+	})
+}
+
 
 
 module.exports = app => app.use('/lives', router);
