@@ -60,9 +60,18 @@ router.post('/convertEverybody', function(req, res) {
   			$lte: startDate
   		}
   	}
+
 	Live.deleteMany(jsonFind, function (err) {
 		console.log('ERROR: ' + err)
 	});
+
+	Push.deleteMany({
+		scheduledTime: {
+			$lte: startDate
+		}
+	}, function(err) {
+		console.log('ERROR PUSHES: ' + err)
+	})
 
 });
 
