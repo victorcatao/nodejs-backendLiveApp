@@ -56,7 +56,6 @@ router.post('/convertEverybody', function(req, res) {
   	
   	const jsonFind = { 
   		isRecorded: false,
-  		hidden: true,
   		dateUTC: {
   			$lte: startDate
   		}
