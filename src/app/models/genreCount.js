@@ -3,7 +3,7 @@ const mongoose = require('../../database/index.js');
 const GenreCountSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: 'Preencha o name'
+    required: 'Fill the name'
   },
   count: {
     type: Number,

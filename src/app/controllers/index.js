@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-// Importa todos os controllers automaticamente
+// This file is used to load all controllers dynamically
+// It reads all files in the current directory and requires them
 module.exports = app => {
   fs
     .readdirSync(__dirname)

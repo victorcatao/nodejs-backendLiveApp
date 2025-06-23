@@ -4,8 +4,8 @@ const Push = require('../models/push')
 const firebase = require('./firebase')
 
 const createPushesForNewLive = function createPushesForNewLive(body, live) {
-	console.log(`Vai criar push para o body: \n${body} LIVE:\n${live}`)
-	// PUSH QUANDO A LIVE COMECAR
+
+	// Push when live starts
 	var titleStart = "Tá na horaaa!"
 	var bodyStart = `Tá na hora da live com ${body.name}! Clique aqui para acessar ;)`
 	var urlStart = live.url[0]
@@ -38,11 +38,7 @@ const createPushesForNewLive = function createPushesForNewLive(body, live) {
 		schedulePush(pushStart)
 	})
 
-
-
-
-
-	// PUSH DE AVISO ANTES DA LIVE COMECAR
+	// Push before the live starts
 	var titleBefore = 'Tá chegando a hora!'
 	var bodyBefore = `Daqui a pouco tem live com ${body.name}! Fique ligado ;)`
 	var urlBefore = live.url[0]
@@ -103,14 +99,13 @@ const schedulePush = function schedulePush(push) {
 }
 
 const sendPush = function sendPush(push) {
-	console.log('sendPush: Vai ENVIAR o Push: ' + push.body)
 	firebase.sendPushV2(push)
 
 	Push.deleteOne({ '_id': push.id }, function(err){
 		if(err) {
 			console.log(err)
 		}
-		console.log('APAGOU O PUSH')
+		console.log('Deleting push')
 	})
 }
 
@@ -119,29 +114,24 @@ const restartPushes = function restartPushes() {
 
 		Push.find().then(
 			function(docs){
-				console.log('RECUPERANDO PUSHES V2 QUE NAO FORAM ENVIADOS')
 
 				docs.forEach(function(push, index) {
-					console.log(`DESPROGRAMANDO PUSH: ${push.body}`)
 					if(schedule.scheduledJobs[push.id]) {
 						schedule.scheduledJobs[push.id].cancel()
 					}
 				})
 
 				setTimeout(function () {
-	  				console.log('CANCELOU TODOS OS JOBS ANTIGOS, AGORA BORA PROGRAMAR OS PROXIMOS')
 					docs.forEach(function(push, index) {
-						console.log(`PROGRAMANDO PUSH: ${push.body}`)
 						schedulePush(push)
 					})
-				}, 10000) // 10segs
+				}, 10000)
 				
 			}
 		).catch(error => { throw error})
 
 	}, 5000)
 }
-
 
 module.exports = {
 	createPushesForNewLive: createPushesForNewLive,

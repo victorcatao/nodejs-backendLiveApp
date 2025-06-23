@@ -15,15 +15,7 @@ const mongoose = require('mongoose')
 
 const router = express.Router();
 
-// firebase.sendPush(
-// 	"fNopJxfC3kugj1PtnbGBEs:APA91bH20aNyjG3LmPyg9ZUP13yB7JZb4d0rToi1ws7fQWwqBS0Ji0m6mhdYae-A_PtjaNo4a3vdG4G5AJFCngAio5xJcSE1YBxTijBDPZILYLX3L-1iQ14WpACeTIRTENBkegKVV4gu", 
-// 	"Começooooou!", 
-// 	`Começou a live com pelo app ;)`, 
-// 	"https://google.com")
-
-
-// FORMATO DE PUSH ANTIGO
-// Isso é pra reprogramar as rotinas que morreram por conta do servidor ter sido restartado
+// This is to reprogram the routines that died because the server was restarted
 
 PushScheduled.find().then(
 	function(docs) {
@@ -32,7 +24,7 @@ PushScheduled.find().then(
 		docs.forEach(function(push, index) {
 			let key = push.firebaseToken + push.body
 			if(arr.includes(key)) {
-				// deleta o push pq tá duplicado
+				// delete this push because it is a duplicate
 				PushScheduled.remove({'_id': push.id}, function(err){})
 			} else {
 				arr.push(key)
@@ -51,15 +43,7 @@ PushScheduled.find().then(
 removeTrash()
 pushHelper.restartPushes()
 
-
-router.post('/convertEverybody', function(req, res) {
-
-});
-
-
 router.post('/sendSuggestion', function(req, res) {
-
-
 	if(req.body.artist == null) {
 		return res.status(400).send(responseHelper.jsonError('Artista inválido'))
 	}
@@ -78,16 +62,11 @@ router.post('/sendSuggestion', function(req, res) {
 	})
 });
 
-
-
-
 router.post('/createMinduca', function(req, res) {
 
 	req.body.forEach(function(live, index){
 		req.body[index].dateUTC = timeHelper.getDateUTC(live.date, live.time)
 	})
-
-	console.log(`MANDOU NO MINDUCA: ${req.body}`)
 
 	Live.insertMany(req.body)
 	    .then(function (docs) {
@@ -99,16 +78,14 @@ router.post('/createMinduca', function(req, res) {
 	    })
 });
 
-
-
 router.post('/create', function(req, res) {
 
 	if(req.body.date == null || req.body.date.length != 10) {
-		return res.status(400).send(responseHelper.jsonError('Data no formato inválido. Correto: DD/MM/YYYY HH:mm'))
+		return res.status(400).send(responseHelper.jsonError('Invalid date format - DD/MM/YYYY HH:mm'))
 	}
 
 	if(req.body.time == null || req.body.time.length != 5) {
-		return res.status(400).send(responseHelper.jsonError('time no formato inválido. Correto: HH:mm'))
+		return res.status(400).send(responseHelper.jsonError('Invalid time format - HH:mm'))
 	}
 
 	req.body.dateUTC = timeHelper.getDateUTC(req.body.date, req.body.time)
@@ -166,14 +143,10 @@ router.get('/tomorrow', function(req, res) {
 	);
 });
 
-
-
-
 router.get('/today', function(req, res) {
 
 	// subtract 3 (GMT) + 5 (limite live)
 	const startToday = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').format()
-	// const startToday = moment().tz("UTC").subtract(8, 'hours').format()
 	const endToday = moment().tz("UTC").subtract(3, 'hours').endOf('day').add(3, 'hours').format()
 	
 	const findRecord = (req.query.findRecord == 'true') || (req.query.findRecord == true)
@@ -208,8 +181,6 @@ router.get('/today', function(req, res) {
 		}
 	);
 });
-
-
 
 router.get('/findByGenre', function(req, res) {
 	
@@ -261,8 +232,6 @@ router.get('/findByGenre', function(req, res) {
 	);
 });
 
-
-
 router.get('/genres', function(req, res) {
 	
 	const startToday = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').format()
@@ -298,8 +267,6 @@ router.get('/genres', function(req, res) {
 	});
 });
 
-
-
 router.post('/deletePushes', async (req, res) => {
 	res.send()
 	if(req.body.firebaseToken){
@@ -312,7 +279,6 @@ router.post('/deletePushes', async (req, res) => {
 		})	
 	}	
 })
-
 
 // DEPRECATED
 router.post('/addToCalendar', async (req, res) => {
@@ -399,19 +365,9 @@ router.post('/addToCalendar', async (req, res) => {
 		)
 
 	})
-
-
-	
-
 });
 
-
-
-
-
 function sponsorPush(push){
-	// console.log(push)
-
 	if(push.isLive == true) {
 		const scheduledTimeOnTime = timeHelper.getScheduledTimeToPushOnTime(push.date, push.time)
 		// console.log(scheduledTimeOnTime)
@@ -420,9 +376,9 @@ function sponsorPush(push){
 
 			PushScheduled.deleteOne({ '_id': push.id }, function (err) {
 			  if (err) {
-			  	console.log(`sponsorPush enviado mas NÃO DELETADO: ${pushMongoDBId}`)
+			  	console.log(`sponsorPush sent but not deleted: ${pushMongoDBId}`)
 			  } else {
-			  	console.log('sponsorPush ENVIADO E DELETADO COM SUCESSO')
+			  	console.log('sponsorPush sent and deleted successfully')
 			  }
 			});
 
@@ -436,14 +392,13 @@ function sponsorPush(push){
 		if(push.isLive == false) {
 			PushScheduled.deleteOne({ '_id': push.id }, function (err) {
 			  if (err) {
-			  	console.log(`sponsorPush enviado mas NÃO DELETADO: ${pushMongoDBId}`)
+			  	console.log(`sponsorPush sent but not deleted: ${pushMongoDBId}`)
 			  } else {
-			  	console.log('sponsorPush ENVIADO E DELETADO COM SUCESSO')
+			  	console.log('sponsorPush sent and deleted successfully')
 			  }
 			});
 		}
 	});
-
 }
 
 
@@ -484,13 +439,7 @@ router.get('/getSearchData', async (req, res) => {
     			}
     		)
   		});
-
 });
-
-
-
-
-
 
 router.post('/updateMyLives', async (req, res) => {
 
@@ -524,11 +473,6 @@ router.post('/updateMyLives', async (req, res) => {
 
 });
 
-
-
-
-
-
 router.get('/all', async (req, res) => {
 
   	const startToday = moment().tz("UTC").subtract(3, 'hours').startOf('day').add(3, 'hours').format()
@@ -544,9 +488,6 @@ router.get('/all', async (req, res) => {
     		$gte: startToday
   		}
   	}
-
-	// console.log(req.query.findRecord)
- //  	console.log(jsonFind)
 
 	Live.find(
 		jsonFind,
@@ -570,17 +511,15 @@ router.get('/all', async (req, res) => {
 
 });
 
-
-
 router.post('/sendSugestion', function(req, res) {
 
 
 	if(req.body.artist == null) {
-		return res.status(400).send(responseHelper.jsonError('Artista inválido'))
+		return res.status(400).send(responseHelper.jsonError('Invalid artist'))
 	}
 
 	if(req.body.social_network == null) {
-		return res.status(400).send(responseHelper.jsonError('Social network inválido'))
+		return res.status(400).send(responseHelper.jsonError('Social network invalid'))
 	}
 
 	var suggestion = new Suggestion(req.body);
@@ -596,8 +535,6 @@ router.post('/sendSugestion', function(req, res) {
 
 
 router.get('/getAllLives', async (req, res) => {
-
-  	
 	Live.find(
 		{hidden: false},
   		[],
@@ -612,18 +549,12 @@ router.get('/getAllLives', async (req, res) => {
   			})
     		res.send(docs)
   		});
-
 });
 
 
 router.get('/getDonationURL', async (req, res) => {
-
   	res.send({url: "https://secure.unicef.org.br/Default.aspx?origem=drtv&gclid=CjwKCAjwtqj2BRBYEiwAqfzur_ZpbfYUjkUqH0boMR-cmm8x0RDS8K9Xe8fKS7I2hMUEFSO513FMAhoCU98QAvD_BwE"})
-
 });
-
-
-
 
 function removeTrash() {
 	const startDate = moment().tz("UTC").subtract(7, 'days').format()
@@ -647,7 +578,5 @@ function removeTrash() {
 		console.log('REMOVE TRASH ERROR PUSHES: ' + err)
 	})
 }
-
-
 
 module.exports = app => app.use('/lives', router);

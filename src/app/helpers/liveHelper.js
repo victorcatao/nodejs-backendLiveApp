@@ -4,7 +4,6 @@ const Push = require('../models/push')
 
 const liveEstimatedTime = 12600000 // 3h 30m
 
-
 const setLiveIsLiveNow = function setLiveIsLiveNow(live) {
 	if(live.forcedLive == true) {
 		live.live = true
@@ -24,11 +23,10 @@ function removeFinishedLivesForToday(lives) {
 	var filteredResult = []
 	lives.forEach(function(live, index){
 		const diff = Date.now() - live.dateUTC
-		if(diff > liveEstimatedTime && live.forcedLive == false) {
-			// NAO DEVE APARECER PQ JA PASSOU DAS HORAS DELE
-		} else {
+
+		if(diff <= liveEstimatedTime || live.forcedLive) {
 			filteredResult.push(live)
-		}	
+		}
 	})
 	
 	return filteredResult

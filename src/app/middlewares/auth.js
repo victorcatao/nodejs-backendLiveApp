@@ -4,7 +4,7 @@ const authConfig = require('../../config/auth.json');
 module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if(!authHeader){
-    return res.status(401).send({ 'error': 'Você precisa fazer login' });
+    return res.status(401).send({ 'error': 'You need to login' });
   }
 
   // Bearer eyJhbGciOiJIUzI1NiIsInR5c...
@@ -19,8 +19,8 @@ module.exports = (req, res, next) => {
     return res.status(401).send({ 'error': 'Token error' });
   }
 
-  jwt.verify(token, authConfig.secret, (err, decoded) => { // decoded = id do usuario
-    if(err) return res.status(401).send({ 'error': 'Token inválido' });
+  jwt.verify(token, authConfig.secret, (err, decoded) => { // decoded = user id
+    if(err) return res.status(401).send({ 'error': 'Invalid token' });
     req.userId = decoded.id;
     return next();
   })

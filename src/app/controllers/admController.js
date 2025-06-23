@@ -33,7 +33,7 @@ router.get('/getAllLives', async (req, res) => {
   		[],
   		{
 			sort: {
-			    dateUTC: 1 //Sort by Date Added DESC
+			    dateUTC: 1 // Sort by Date Added DESC
 			}
   		},
   		function(err, docs){
@@ -47,14 +47,14 @@ router.get('/getAllLives', async (req, res) => {
 
 router.post('/update/dateTime', async (req, res) => {
 	if(!req.body.time || !req.body.date || !req.body.liveId) {
-		return res.status(400).send(responseHelper.jsonError('Faltou enviar date, time ou liveId'))
+		return res.status(400).send(responseHelper.jsonError('Missing date, time or liveId'))
 	}
 
 	let date = req.body.date
 	let time = req.body.time
 
 	if(time.length != 5 || date.length != 10){
-		return res.status(400).send(responseHelper.jsonError('Date ou time inválido'))
+		return res.status(400).send(responseHelper.jsonError('Date or time invalid'))
 	}
 
 	let query = { '_id': req.body.liveId }
@@ -95,7 +95,7 @@ router.post('/update/dateTime', async (req, res) => {
 router.post('/update/url', async (req, res) => {
 
 	if(!req.body.liveId) {
-		return res.status(400).send(responseHelper.jsonError('Faltou liveId'))
+		return res.status(400).send(responseHelper.jsonError('Invalid liveId'))
 	}
 
 	let query = { '_id': req.body.liveId }
@@ -133,7 +133,7 @@ router.post('/update/url', async (req, res) => {
 router.post('/update/name', async (req, res) => {
 
   if(!req.body.liveId || !req.body.name) {
-    return res.status(400).send(responseHelper.jsonError('Faltou liveId ou name'))
+    return res.status(400).send(responseHelper.jsonError('Invalid liveId or name'))
   }
 
   let query = { '_id': req.body.liveId }
@@ -166,7 +166,7 @@ router.post('/update/name', async (req, res) => {
 router.post('/update/genre', async (req, res) => {
 
   if(!req.body.liveId || !req.body.genres) {
-    return res.status(400).send(responseHelper.jsonError('Faltou liveId ou genres'))
+    return res.status(400).send(responseHelper.jsonError('Missing liveId or genres'))
   }
 
   let query = { '_id': req.body.liveId }
@@ -187,7 +187,7 @@ router.post('/update/genre', async (req, res) => {
 router.post('/update/socialNetwork', async (req, res) => {
 
   if(!req.body.liveId || !req.body.socialNetwork) {
-    return res.status(400).send(responseHelper.jsonError('Faltou liveId ou socialNetwork'))
+    return res.status(400).send(responseHelper.jsonError('Missing liveId or socialNetwork'))
   }
 
   let query = { '_id': req.body.liveId }
@@ -207,7 +207,7 @@ router.post('/update/socialNetwork', async (req, res) => {
 router.post('/update/recorded', async (req, res) => {
 
 	if(!req.body.liveId) {
-		return res.status(400).send(responseHelper.jsonError('Faltou recorded ou liveId'))
+		return res.status(400).send(responseHelper.jsonError('Missing recorded or liveId'))
 	}
 
 	let query = { '_id': req.body.liveId }
@@ -229,7 +229,7 @@ router.post('/update/recorded', async (req, res) => {
 router.post('/update/forcedLive', async (req, res) => {
 
 	if(!req.body.liveId) {
-		return res.status(400).send(responseHelper.jsonError('Faltou liveId'))
+		return res.status(400).send(responseHelper.jsonError('Missing liveId'))
 	}
 
 	let query = { '_id': req.body.liveId }
@@ -250,7 +250,7 @@ router.post('/update/forcedLive', async (req, res) => {
 
 router.post('/delete/live', async (req, res) => {
 	if(!req.body.liveId) {
-		return res.status(400).send(responseHelper.jsonError('Envie o liveId'))
+		return res.status(400).send(responseHelper.jsonError('Missing liveId'))
 	}
 	const liveId = req.body.liveId
 	let query = { 
@@ -267,7 +267,7 @@ router.post('/delete/live', async (req, res) => {
     			return res.status(400).send(responseHelper.jsonError(errPush))
     		}
     		pushHelper.restartPushes()
-    		res.send(responseHelper.jsonSuccess('Deletou com sucesso'))
+    		res.send(responseHelper.jsonSuccess('Deleted successfully'))
     	});
 	});
 })
@@ -276,7 +276,7 @@ router.post('/delete/live', async (req, res) => {
 
 router.post('/hide/live', async (req, res) => {
 	if(!req.body.liveId || req.body.hidden == null) {
-		return res.status(400).send(responseHelper.jsonError('Envie o liveId e o hidden'))
+		return res.status(400).send(responseHelper.jsonError('Missing liveId or hidden'))
 	}
 	const liveId = req.body.liveId
 	let query = { '_id': liveId }
@@ -285,7 +285,7 @@ router.post('/hide/live', async (req, res) => {
 		if (err || !live) {
     		return res.status(400).send({ error: err })
     	}
-    	res.send(responseHelper.jsonSuccess('ALTEROU COM SUCESSO'))
+    	res.send(responseHelper.jsonSuccess('Updated successfully'))
 	})
 
 })
@@ -293,7 +293,7 @@ router.post('/hide/live', async (req, res) => {
 
 router.post('/search', async (req, res) => {
 	if(!req.body.name) {
-		return res.status(400).send(responseHelper.jsonError('Search vazio'))
+		return res.status(400).send(responseHelper.jsonError('Search empty'))
 	}
 
   	const jsonFind = { 
@@ -336,7 +336,7 @@ router.post('/suggestions/deleteAll', async (req, res) => {
 	  		if(error) { 
 	  			return res.status(400).send(responseHelper.jsonError(error))
 	  		}
-	  		res.send(responseHelper.jsonSuccess('Todas as sugestões foram deletadas com sucesso'))
+	  		res.send(responseHelper.jsonSuccess('Deleted successfully'))
   		}
   	)
 
@@ -347,18 +347,16 @@ router.post('/suggestions/deleteAll', async (req, res) => {
 
 router.post('/suggestions/delete', async (req, res) => {
 	if(!req.body.suggestionId) {
-		return res.status(400).send(responseHelper.jsonError('suggestionId vazio'))
+		return res.status(400).send(responseHelper.jsonError('suggestionId empty'))
 	}
 
 	Suggestion.deleteOne({ '_id': req.body.suggestionId }, function (err) {
 		if (err) {
     		return res.status(400).send(responseHelper.jsonError(err))
     	}
-    	res.send(responseHelper.jsonSuccess('Deletou'))
+    	res.send(responseHelper.jsonSuccess('Deleted successfully'))
 	});
 
 });
-
-
 
 module.exports = app => app.use('/adm', router);

@@ -40,10 +40,6 @@ const sendPushFunction = function sendPush(token, title, body, url) {
     token: token
   };
 
-  console.log('VAI ENVIAR O PAYLOAD ABAIXO')
-  console.log(message)
-
-
   admin.messaging().send(message)
     .then((response) => {
       // Response is a message ID string.
@@ -54,7 +50,6 @@ const sendPushFunction = function sendPush(token, title, body, url) {
     });
 
 }
-
 
 const sendPushV2Function = function sendPushV2(push) {
 
@@ -89,11 +84,9 @@ const sendPushV2Function = function sendPushV2(push) {
       }
     }
   };
-
-  console.log('VAI ENVIAR O PAYLOAD ABAIXO')
+  
   console.log(message)
-
-
+  
   admin.messaging().send(message)
     .then((response) => {
       // Response is a message ID string.
